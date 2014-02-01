@@ -46,22 +46,22 @@ using arrow up/down keys, or by hitting k,j keys.  Press tab to switch to
 the Account list, which you can navigate similarly.
 
 You can exit pynances.py by hitting escape, or by getting to the command
-line and typing any word that starts with q.  E.g. quit.
+line and typing any word that starts with q, e.g. quit.
 
-You can access the pynances command line by hitting :, ;, or /.
+You can access the pynances command line by hitting `:`, `;`, or `/`.
 Available commands:
 
-+ e(dit) ASDF - edit the file ASDF in the current YYYY/mm directory.      
++ `e(dit) ASDF` - edit the file ASDF in the current YYYY/mm directory.      
     
-+ reload - reloads the month from the current YYYY/mm directory, resets the screen.
++ `reload` - reloads the month from the current YYYY/mm directory, resets the screen.
 
-+ load YYYY/mm - loads the finances from YYYY/mm directory.  mm = 01, 02, ..., 12.
++ `load YYYY/mm` - loads the finances from YYYY/mm directory.  mm = 01, 02, ..., 12.
 
-+ load mm - loads finances from the current year, but month mm.
++ `load mm` - loads finances from the current year, but month mm.
 
-+ generate - starting from the current YYYY/mm, it generates the correct startingbalances for the next month.
++ `generate` - starting from the current YYYY/mm, it generates the correct startingbalances for the next month.
 
-+ q(uit) - quits.
++ `q(uit)` - quits.
 
 
 Editing files
@@ -69,7 +69,7 @@ Editing files
 
 In pynances.py, the screen needs to be wide enough for the edit window to appear, 
 so you may need to resize your window to edit files.  But to quickly
-edit bills, you get to the pynances command line and type "e bills".
+edit bills, you get to the pynances command line and type `e bills`.
 
 Next you will notice that
 curses editing makes you want to curse!  I have listed some useful commands
@@ -90,9 +90,9 @@ different when adding totals and what not.
 
 ### Account files
 
-Use the "account" keyword near the top of your account files.
-Accounts should have a "startingbalance", but no "budget".  More on those later.  
-Accounts should be a single word, like "S" for "Savings", and they should be
+Use the `account` keyword near the top of your account files.
+Accounts should have a `startingbalance`, but no `budget`.  More on those 
+later.  Accounts should be a single word, like "S" for "Savings", and they should be
 listed in ACCOUNTS in config.py, with a more descriptive name in ACCOUNTnames.
 
 You can add transfers into an account by specifying, e.g.:
@@ -112,8 +112,8 @@ money is coming out of that account.
 
 ### Income files
 
-These files should have "income" near the top.  Like accounts, they should have
-neither a "budget" nor a "startingbalance."
+These files should have `income` near the top.  Like accounts, they should have
+neither a `budget` nor a `startingbalance`.
 
 You can specify how you get money like this.  For example, if you get some
 cash from selling your lamp and you get your check from Macrohard Company, you can
@@ -130,9 +130,9 @@ your D account (debit) will be credited 1800 USD.
 
 These files can have a few different flags at the top.  If you intend to
 save for things in a certain category, you can make that category have
-a running total by setting its "startingbalance" and its "budget"; the
-"budget" is what you budget for this spending category each month, and the
-"startingbalance" is whatever you have left over from the previous month:
+a running total by setting its `startingbalance` and its `budget`; the
+`budget` is what you budget for this spending category each month, and the
+`startingbalance` is whatever you have left over from the previous month:
     
     startingbalance 0 USD
     budget 30 USD
@@ -146,7 +146,7 @@ the worst damage you can yet do to your accounts each month, besides what
 you've already spent.
 
 If you want your spending category budget to reset each month, set the
-"nocarryover" flag:
+`nocarryover` flag:
 
     nocarryover
     budget 35 USD
@@ -167,21 +167,21 @@ set any "budget" amount.
 Here is a list of all keywords that have a special meaning to the mbf/pynances
 program, and should be used with care inside of the YYYY/mm directory files.
 
-+ account - see "ACCOUNT files" above.
++ `account` - see "ACCOUNT files" above.
 
-+ income - see "INCOME files" above.
++ `income` - see "INCOME files" above.
 
-+ budget - for a spending category, the monthly amount you think you will spend.
++ `budget` - for a spending category, the monthly amount you think you will spend.
 
-+ budgetenough - budget to pay as much as the spending category requires.
++ `budgetenough` - budget to pay as much as the spending category requires.
 
-+ from/FROM - case insensitive.  Immediately following a FROM you should include the account from which you are paying/transfering money.
++ `from/FROM` - case insensitive.  Immediately following a FROM you should include the account from which you are paying/transfering money.
 
-+ paid/PAID - case insensitive.  Immediately following a PAID you should include the account from which you are paying money.
++ `paid/PAID` - case insensitive.  Immediately following a PAID you should include the account from which you are paying money.
 
-+ week/WEEK - case insensitive.  Immediately following a week you should include the week you made the transaction.
++ `week/WEEK` - case insensitive.  Immediately following a week you should include the week you made the transaction.
 
-+ average/AVERAGE - case insensitive.  Immediately following an AVERAGE come two things:  first, a concatenation of all months that the bill actually gets paid, e.g. 369D for March, June, September, and December, then the account from which it gets paid.  At the end of the line comes the monthly average drain on your account.
++ `average/AVERAGE` - case insensitive.  Immediately following an AVERAGE come two things:  first, a concatenation of all months that the bill actually gets paid, e.g. 369D for March, June, September, and December, then the account from which it gets paid.  At the end of the line comes the monthly average drain on your account.
 
 
 ### Examples:
@@ -215,3 +215,14 @@ Closing remarks
 That is pretty much it.  Hope you find it useful, but no guarantee (see the LICENSE).
 If there is a bug somewhere, let me know how to replicate it and I will attempt to 
 fix it.
+
+Try to keep your "Monthly expected outpour" (everything budgeted but non-business) 
+smaller than your "Monthly expected income" (all your non-business income).
+Your "Accumulated anti-savings" is the sum of what is left in each of your spending
+categories, and that is the worse damage you can do to your accounts this month,
+at least from what you are budgeting.  
+
+Money is a means to an end, but is not life or death!  Remember your Creator
+and have fun.
+
+
