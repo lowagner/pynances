@@ -88,22 +88,24 @@ class MainScreen:
     def switchwhichwin( self , towin=0 ):
         if towin:
             if towin == "cat":
-                if self.filedir == "":
-                    self.editwin.addstr(0,2,"Edit")
-                else:
-                    self.editwin.addstr(0,2,"Edit "+self.filedir )
+                if self.editpad:
+                    if self.filedir == "":
+                        self.editwin.addstr(0,2,"Edit")
+                    else:
+                        self.editwin.addstr(0,2,"Edit "+self.filedir )
                 self.acctwin.addstr(0,2,"Accounts" )
                 self.catwin.addstr(0,2,"Categories", curses.A_UNDERLINE)
                 self.whichwin = "cat"
             elif towin == "acct":
-                if self.filedir == "":
-                    self.editwin.addstr(0,2,"Edit")
-                else:
-                    self.editwin.addstr(0,2,"Edit "+self.filedir )
+                if self.editpad:
+                    if self.filedir == "":
+                        self.editwin.addstr(0,2,"Edit")
+                    else:
+                        self.editwin.addstr(0,2,"Edit "+self.filedir )
                 self.catwin.addstr(0,2,"Categories") # erase special text effect on Categories
                 self.acctwin.addstr(0,2,"Accounts", curses.A_UNDERLINE)
                 self.whichwin = "acct"
-            else: # towin == "edit"
+            elif self.editpad: # towin == "edit"
                 if self.filedir == "":
                     self.editwin.addstr(0,2,"Edit", curses.A_UNDERLINE )
                 else:
@@ -122,7 +124,8 @@ class MainScreen:
 
             self.acctwin.refresh()
             self.catwin.refresh()
-            self.editwin.refresh()
+            if self.editpad:
+                self.editwin.refresh()
         else:
             # if no window was given, then switch between categories and accounts
             if self.whichwin == "cat":
