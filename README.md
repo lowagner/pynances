@@ -48,17 +48,17 @@ You can access the pynances command line by hitting :, ;, or /.
 
 Available commands at the command line (accessible by hitting :, ;, or /):
 
-    e(dit) ASDF - edit the file ASDF in the current YYYY/mm directory.      
++ e(dit) ASDF - edit the file ASDF in the current YYYY/mm directory.      
     
-    reload - reloads the month from the current YYYY/mm directory, resets the screen.
++ reload - reloads the month from the current YYYY/mm directory, resets the screen.
 
-    load YYYY/mm - loads the finances from YYYY/mm directory.  mm = 01, 02, ..., 12.
++ load YYYY/mm - loads the finances from YYYY/mm directory.  mm = 01, 02, ..., 12.
 
-    load mm - loads finances from the current year, but month mm.
++ load mm - loads finances from the current year, but month mm.
 
-    generate - starting from the current YYYY/mm, it generates the correct startingbalances for the next month.
++ generate - starting from the current YYYY/mm, it generates the correct startingbalances for the next month.
 
-    q(uit) - quits.
++ q(uit) - quits.
 
 General user interface:
 
@@ -90,7 +90,7 @@ different when adding totals and what not.
 
 
 
-ACCOUNT Files:
+### ACCOUNT Files:
 
 Use the "account" keyword near the top of your account files.
 Accounts should have a "startingbalance", but no "budget".  More on those later.  
@@ -112,7 +112,7 @@ spending category file, and the code will be smart enough to know that
 money is coming out of that account.
 
 
-INCOME Files:
+### INCOME Files:
 
 These files should have "income" near the top.  Like accounts, they should have
 neither a "budget" nor a "startingbalance."
@@ -128,7 +128,7 @@ This indicates that your X account (cash) will be credited $30, and that
 your D account (debit) will be credited 1800 USD.
 
 
-SPENDING CATEGORY Files:
+### SPENDING CATEGORY Files:
 
 These files can have a few different flags at the top.  If you intend to
 save for things in a certain category, you can make that category have
@@ -164,7 +164,7 @@ like "bills" however, should.  If you use "budgetenough," you should not
 set any "budget" amount.
 
 
-KEYWORDS:
+### KEYWORDS:
 
 Here is a list of all keywords that have a special meaning to the mbf/pynances
 program, and should be used with care inside of the YYYY/mm directory files.
@@ -186,7 +186,13 @@ program, and should be used with care inside of the YYYY/mm directory files.
     average/AVERAGE - case insensitive.  Immediately following an AVERAGE come two things:  first, a concatenation of all months that the bill actually gets paid, e.g. 369D for March, June, September, and December, then the account from which it gets paid.  At the end of the line comes the monthly average drain on your account.
 
 
-Examples:
+### Examples:
+
+Check the YYYY/mm directory for some examples of how to put account files,
+income files, and spending category files all together.  Or just load up
+pynances.py and check some of them out with the edit command.
+
+Here we just show some examples on how to make payments for certain things.
 
 Here we pay $30 cash for the Lord of the Rings movie:
 
