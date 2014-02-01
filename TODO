@@ -1,7 +1,3 @@
-Generate next month's stuff
-
-
-
 Switch over to urwid for terminal displaying rather than curses.
 (Much more reliable window resizing, also cooler.)
 
