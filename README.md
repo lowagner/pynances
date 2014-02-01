@@ -92,7 +92,7 @@ different when adding totals and what not.
 
 Use the `account` keyword near the top of your account files.
 Accounts should have a `startingbalance`, but no `budget`.  More on those 
-later.  Accounts should be a single word, like "S" for "Savings", and they should be
+later.  Accounts should be a single word, like "D" for "Debit Account", and they should be
 listed in ACCOUNTS in config.py, with a more descriptive name in ACCOUNTnames.
 
 You can add transfers into an account by specifying, e.g.:
@@ -112,8 +112,8 @@ money is coming out of that account.
 
 ### Income files
 
-These files should have `income` near the top.  Like accounts, they should have
-neither a `budget` nor a `startingbalance`.
+These files should have `income` near the top.  Like accounts, they should not have
+have a `budget`, but unlike accounts they should not have a `startingbalance`.
 
 You can specify how you get money like this.  For example, if you get some
 cash from selling your lamp and you get your check from Macrohard Company, you can
@@ -156,10 +156,10 @@ let the left-over pieces accumulate.  Nevertheless, what is currently left
 for this month goes into the "Accumulated anti-savings" mentioned earlier.
 
 Finally, if you don't know how much a certain category will require, but
-you need to pay for it no matter what, you should use the "budgetenough"
+you need to pay for it no matter what, you should use the `budgetenough`
 flag.  Very few spending categories should merit this evil tag.  Things
-like "bills" however, should.  If you use "budgetenough," you should not 
-set any "budget" amount.
+like "bills" however, should.  If you use `budgetenough`, you should not 
+set any `budget` amount.
 
 
 ### Keywords
@@ -205,7 +205,7 @@ the average monthly cost is $70:
 
     Gecko Insurance AVERAGE 4O D 70 USD
 
-where "4O" is 4 = April, O = October (not a zero) is when the
+where `4O` implies that 4 = April, O = October (not a zero) is when the
 insurance company takes out the money from your debit account.
 
 
