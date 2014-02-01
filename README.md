@@ -40,13 +40,16 @@ pynances.py
 
 This is a nice user interface to mbf.py, which allows you to edit
 your bills and income directly, as well as see your finances visually.  
-You can exit pynances.py by hitting
-escape, or by getting to the command line and typing any word that 
-starts with q.  E.g. quit.
+
+When you first enter pynances.py, you can go through the Category list by
+using arrow up/down keys, or by hitting k,j keys.  Press tab to switch to
+the Account list, which you can navigate similarly.
+
+You can exit pynances.py by hitting escape, or by getting to the command
+line and typing any word that starts with q.  E.g. quit.
 
 You can access the pynances command line by hitting :, ;, or /.
-
-Available commands at the command line (accessible by hitting :, ;, or /):
+Available commands:
 
 + e(dit) ASDF - edit the file ASDF in the current YYYY/mm directory.      
     
@@ -60,21 +63,16 @@ Available commands at the command line (accessible by hitting :, ;, or /):
 
 + q(uit) - quits.
 
-General user interface:
-
-When you first enter pynances.py, you can go through the Category list by
-using arrow up/down keys, or by hitting k,j keys.  Press tab to switch to
-the Account list, which you can navigate similarly.
 
 Editing files
 -------------
 
 In pynances.py, the screen needs to be wide enough for the edit window to appear, 
 so you may need to resize your window to edit files.  But to quickly
-edit bills, you get to the command line and type "e bills".
+edit bills, you get to the pynances command line and type "e bills".
 
 Next you will notice that
-curses editing makes you want to curse!  I have added some useful commands
+curses editing makes you want to curse!  I have listed some useful commands
 in edit mode at the bottom of the edit window, but not all of these work on
 Mac (I have found that C-o does not work there).  Also on Mac you need
 to use C-h to backspace and delete characters.
@@ -90,7 +88,7 @@ different when adding totals and what not.
 
 
 
-### ACCOUNT Files:
+### Account files
 
 Use the "account" keyword near the top of your account files.
 Accounts should have a "startingbalance", but no "budget".  More on those later.  
@@ -112,7 +110,7 @@ spending category file, and the code will be smart enough to know that
 money is coming out of that account.
 
 
-### INCOME Files:
+### Income files
 
 These files should have "income" near the top.  Like accounts, they should have
 neither a "budget" nor a "startingbalance."
@@ -128,7 +126,7 @@ This indicates that your X account (cash) will be credited $30, and that
 your D account (debit) will be credited 1800 USD.
 
 
-### SPENDING CATEGORY Files:
+### Spending category files
 
 These files can have a few different flags at the top.  If you intend to
 save for things in a certain category, you can make that category have
@@ -164,26 +162,26 @@ like "bills" however, should.  If you use "budgetenough," you should not
 set any "budget" amount.
 
 
-### KEYWORDS:
+### Keywords
 
 Here is a list of all keywords that have a special meaning to the mbf/pynances
 program, and should be used with care inside of the YYYY/mm directory files.
 
-    account - see "ACCOUNT files" above.
++ account - see "ACCOUNT files" above.
 
-    income - see "INCOME files" above.
++ income - see "INCOME files" above.
 
-    budget - for a spending category, the monthly amount you think you will spend.
++ budget - for a spending category, the monthly amount you think you will spend.
 
-    budgetenough - budget to pay as much as the spending category requires.
++ budgetenough - budget to pay as much as the spending category requires.
 
-    from/FROM - case insensitive.  Immediately following a FROM you should include the account from which you are paying/transfering money.
++ from/FROM - case insensitive.  Immediately following a FROM you should include the account from which you are paying/transfering money.
 
-    paid/PAID - case insensitive.  Immediately following a PAID you should include the account from which you are paying money.
++ paid/PAID - case insensitive.  Immediately following a PAID you should include the account from which you are paying money.
 
-    week/WEEK - case insensitive.  Immediately following a week you should include the week you made the transaction.
++ week/WEEK - case insensitive.  Immediately following a week you should include the week you made the transaction.
 
-    average/AVERAGE - case insensitive.  Immediately following an AVERAGE come two things:  first, a concatenation of all months that the bill actually gets paid, e.g. 369D for March, June, September, and December, then the account from which it gets paid.  At the end of the line comes the monthly average drain on your account.
++ average/AVERAGE - case insensitive.  Immediately following an AVERAGE come two things:  first, a concatenation of all months that the bill actually gets paid, e.g. 369D for March, June, September, and December, then the account from which it gets paid.  At the end of the line comes the monthly average drain on your account.
 
 
 ### Examples:
