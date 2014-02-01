@@ -1,0 +1,15 @@
+Generate next month's stuff
+
+
+
+Switch over to urwid for terminal displaying rather than curses.
+(Much more reliable window resizing, also cooler.)
+
+
+Random mostly incomprehensible notes:
+
+Get rid of adding up totals (probably is already in the month)
+for the accounts.  but probably ok if we don't
+
+Make difference between budget and spending for non-business
+Also possibly give what's left

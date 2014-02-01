@@ -1,0 +1,6 @@
+# capital 1 account
+account
+startingbalance -302.65 USD
+
+# make payments from debit
+Paid D 100 USD

@@ -1,0 +1,9 @@
+# food budget
+nocarryover
+budget 426
+# default currency is in conig.DEFAULTcurrency
+
+# a valid account must follow "PAID".
+Hornbachers PAID EX 13.45
+
+

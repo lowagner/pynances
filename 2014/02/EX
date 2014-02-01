@@ -1,0 +1,7 @@
+# european cash
+account
+startingbalance 26.18 EURO
+
+# here we transfer money between accounts.
+# taking out 100 euros from debit account.
+Withdrawal FROM ED 70 EURO

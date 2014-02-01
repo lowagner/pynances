@@ -1,0 +1,8 @@
+# european savings
+account
+startingbalance 0 EURO
+
+# transfers can be made between accounts.
+# here we transfer 100 euros from account ED to this account (ES).
+# FROM is the keyword here, but it behaves exactly like "PAID."
+Transfer FROM ED 100 EURO

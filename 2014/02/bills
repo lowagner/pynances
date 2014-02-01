@@ -1,0 +1,18 @@
+# bills -- the things that are fairly constant from
+# one month to the next
+
+budgetenough
+
+Rent PAID ED 771.81
+Cell Phone PAID EX 0.00
+Bank Fee PAID ED 3.80
+
+# health insurance averages to 179.53 euros a month
+# but it gets paid every january in one big lump sum.
+
+Health Insurance AVERAGE 1 ED 179.53
+
+# water averages to 13.54 euros a month, but
+# it gets paid every other month -- February, April, etc.
+
+Water AVERAGE 2468OD ED 13.54
