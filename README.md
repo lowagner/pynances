@@ -101,7 +101,7 @@ You can add transfers into an account by specifying, e.g.:
 
 which will transfer 10 dollars from your S (Savings) account into whatever
 account you put that line in.  Instead of FROM, you can also use PAID,
-or FrOm, or from, or PaiD -- these keywords are case sensitive.  See the
+or FrOm, or from, or PaiD -- these keywords are case insensitive.  See the
 PAID/FROM keyword below for additional help.
 
 When you spend things in different categories using a given account, 
@@ -167,9 +167,9 @@ set any `budget` amount.
 Here is a list of all keywords that have a special meaning to the mbf/pynances
 program, and should be used with care inside of the YYYY/mm directory files.
 
-+ `account` - see "ACCOUNT files" above.
++ `account` - see "Account files" above.
 
-+ `income` - see "INCOME files" above.
++ `income` - see "Income files" above.
 
 + `budget` - for a spending category, the monthly amount you think you will spend.
 
@@ -184,7 +184,7 @@ program, and should be used with care inside of the YYYY/mm directory files.
 + `average/AVERAGE` - case insensitive.  Immediately following an AVERAGE come two things:  first, a concatenation of all months that the bill actually gets paid, e.g. 369D for March, June, September, and December, then the account from which it gets paid.  At the end of the line comes the monthly average drain on your account.
 
 
-### Examples:
+### Examples
 
 Check the YYYY/mm directory for some examples of how to put account files,
 income files, and spending category files all together.  Or just load up
