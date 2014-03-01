@@ -1,8 +1,6 @@
-Switch over to urwid for terminal displaying rather than curses.
-(Much more reliable window resizing, also cooler.)
-Or perhaps some other program...
-
 Tab completion on the pynances command line.
+
+urwid??
 
 
 Random mostly incomprehensible notes:

@@ -7,24 +7,32 @@ Python utility for keeping track of your finances
 Requirements
 ------------
 
-Simply python and ncurses -- ncurses comes with python
-on UNIX platforms (Mac and Linux), but not Windows.
-I am thinking of switching over to using urwid for
-visuals, which handles window resizing and text
-editing a lot nicer.  But until then, all you need
-is python and a Mac or Linux machine.
+pynances has a command line ``interface" `mbf.py`, which
+is platform independent.  
+
+Better to use `pynances.py` or `pyglances.py` for a GUI.
+These have different requirements.  `pynances.py` requires
+`ncurses`, which comes with python on UNIX platforms (Mac
+and Linux), but not Windows.  `pyglances.py` uses `pyglet`
+and `xerox` (`pip install xerox` works well), and is a little
+slower to load graphics and such.
+
+I also thought about porting a GUI to `urwid`, which looks 
+quite nice and should be fast.
 
 Usage
 -----
 
-Run either:
+Run any of these commands...
 
     python mbf.py YYYY/mm
     python pynances.py YYYY/mm
+    python pyglances.py YYYY/mm
 
 where YYYY and mm are the year (e.g. YYYY = 2014) and month 
 (mm = 01 for January, ..., 12 = December) that you wish to investigate.
 If you leave off YYYY/mm, you get the current month and year.
+On Windows you should use backslashes.
 
 mbf.py
 ------
@@ -38,17 +46,17 @@ above.
 pynances.py
 -----------
 
-This is a nice user interface to mbf.py, which allows you to edit
+This is a nice user interface to `mbf.py`, which allows you to edit
 your bills and income directly, as well as see your finances visually.  
 
-When you first enter pynances.py, you can go through the Category list by
-using arrow up/down keys, or by hitting k,j keys.  Press tab to switch to
+When you first enter `pynances.py`, you can go through the Category list by
+using arrow up/down keys, or by hitting `k`,`j` keys.  Press tab to switch to
 the Account list, which you can navigate similarly.
 
-You can exit pynances.py by hitting escape, or by getting to the command
+You can exit `pynances.py` by hitting escape, or by getting to the command
 line and typing any word that starts with q, e.g. quit.
 
-You can access the pynances command line by hitting `:`, `;`, or `/`.
+You can access the command line by hitting `:`, `;`, or `/`.
 Available commands:
 
 + `e(dit) ASDF` - edit the file ASDF in the current YYYY/mm directory.      
@@ -64,21 +72,61 @@ Available commands:
 + `q(uit)` - quits.
 
 
+pyglances.py
+-----------
+
+This is another user interface to `mbf.py`, which allows you to edit
+your bills and income directly, as well as see your finances visually.  
+Here you can use standard mouse-over scrolling to view your accounts
+and spending categories. 
+
+You can exit `pyglances.py` by typing `ctrl+W` or `ctrl+Q`, 
+or by getting to the command line and typing any word that 
+starts with q, e.g. quit.
+
+You can access the command line by hitting `/`.
+Available commands:
+
++ `e(dit) ASDF` - edit the file ASDF in the current YYYY/mm directory.      
+
++ `e` - edit the scratch file in the root directory.  Also can press `e` outside of command mode to accomplish this.      
+
++ `s(ave)` - saves the current file that you are editing.  REMEMBER TO SAVE, the program will not remind you (as of now).  You can also press `s` outside of the command mode.
+    
++ `reload` - reloads the month from the current YYYY/mm directory, resets the screen.
+
++ `load YYYY/mm` - loads the finances from YYYY/mm directory.  mm = 01, 02, ..., 12.
+
++ `load mm` - loads finances from the current year, but month mm.
+
++ `generate` - starting from the current YYYY/mm, it generates the correct startingbalances for the next month.
+
++ `q(uit)` - quits.
+
+Other notes:  If you click in the accounts or categories,
+you can add (and remove) text, but this does not change any files. 
+(Use the reload command, as described above, to reset.)  Press escape
+or click somewhere else to lose focus; that will allow you
+to enter the command mode by pressing `/`.
+
+
+
 Editing files
 -------------
 
-In pynances.py, the screen needs to be wide enough for the edit window to appear, 
+In `pynances.py`, the screen needs to be wide enough for the edit window to appear, 
 so you may need to resize your window to edit files.  But to quickly
-edit bills, you get to the pynances command line and type `e bills`.
+edit bills, you get to the command line and type `e bills`.
 
-Next you will notice that
+Next you will notice that (for `pynances.py`)
 curses editing makes you want to curse!  I have listed some useful commands
 in edit mode at the bottom of the edit window, but not all of these work on
 Mac (I have found that C-o does not work there).  Also on Mac you need
 to use C-h to backspace and delete characters.
 
 You may also edit files directly in the YYYY/mm directory, with whatever program
-you wish.
+you wish.  If you have a running `pynances.py` / `pyglances.py`, you can type
+`reload` at the command line to accommodate your file changes.
 
 Look into the examples given in the YYYY/mm directory, but here I explain how it kinda works.
 Each file in YYYY/mm is either categorized as an account, an income, or a spending category.
