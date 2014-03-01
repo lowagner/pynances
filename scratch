@@ -1,0 +1,12 @@
+scratch file
+
+Edit files by typing "e(dit) file" into command line.  
+You can get to this scratch file by typing "e" without any file.
+Quit by ctrl+w or ctrl+q.  
+
+Save files by first typing escape (to get out of editing mode) and then
+typing "s" or "save" into command line.
+
+THIS PROGRAM DOES NOT NOTICE IF YOU CHANGE AND DO NOT SAVE!
+(so remember to save.  I forgot to save that last bit once.)
+If you forgot which file you were editting, type in "w" or "which" into command line.
