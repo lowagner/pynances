@@ -274,10 +274,10 @@ class Category:
             elif split[0][0] == "#":
                 ## commented line begins with a #
                 pass
-            elif split[0] in self.allowedmetaflags:
-                # if the file is a metaflag
+            elif split[0].lower() in self.allowedmetaflags:
+                # if the line is a metaflag
                 self.metaflags[ split[0] ] = True
-            elif split[0] in self.allowedmetavalues:
+            elif split[0].lower() in self.allowedmetavalues:
                 # then split[0] is a metavalue, and the rest is the value in EUROS
                 datastring = " ".join( split[1:] )
                 self.metavalues[split[0]] = DoughFromString( datastring )
