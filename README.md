@@ -120,7 +120,8 @@ edit bills, you get to the command line and type `e bills`.
 
 Next you will notice that (for pynances.py)
 curses editing makes you want to curse!  I have listed some useful commands
-in edit mode at the bottom of the edit window, but not all of these work on
+in edit mode at the bottom of the edit window -- notice that "C-k" means
+Ctrl+k and similarly for other commands -- but not all of these work on
 Mac (I have found that C-o does not work there).  Also on Mac you need
 to use C-h to backspace and delete characters.
 
