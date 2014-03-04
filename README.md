@@ -76,9 +76,9 @@ pyglances.py
 -----------
 
 This is another user interface to `mbf.py`, which allows you to edit
-your bills and income directly, as well as see your finances visually.  
-Here you can use standard mouse-over scrolling to view your accounts
-and spending categories. 
+your bills and income directly, as well as see your finances 
+visually.  Here you can use standard mouse-over scrolling to view your
+accounts and spending categories. 
 
 You can exit pyglances.py by typing `ctrl+W` or `ctrl+Q`, 
 or by getting to the command line and typing any word that 
