@@ -1,5 +1,7 @@
 Tab completion on the pynances command line.
 
+Why on mac does on_text get called before on_key_press?
+
 urwid??
 
 
