@@ -50,7 +50,26 @@ DARKAQUApalette = { "alertfont" : "Monospaced",
                  #"widecolumns" : (0.25,0.1,0.25,0.7) } # nice purple!
                  "widecolumns" : (0.7,0.7,0.7,0.2) }
 
-DEFAULTpalette = DARKAQUApalette
+LIGHTAQUApalette = { "alertfont" : "Monospaced",
+                "alertfontsize" : 18,
+                "alertfontcolor" : (250,200,180,255), # font in 0 to 255 (R,G,B,A)
+                "bodyfont" : "Arial",
+                "bodyfontsize" : 10,
+                "bodyfontcolor" : (20,20,15,255), # font in 0 to 255 (R,G,B,A)
+                #"bodyfontcolor" : (255,100,100,255), # font in 0 to 255 (R,G,B,A)
+                "bodybgcolor" : (0.9,0.9,0.9,1), # in 0 to 1
+                #"bodybgcolor" : (0.2,0,0,1), # in 0 to 1
+                "titlefont" : "Monospaced",
+                "titlefontsize" : 25,
+                "titlefontcolor" : (255,255,255,255), # font in 0 to 255 (R,G,B,A)
+                "background" : (0.5,0.5,0.5,1),# color in 0 to 1 (R,G,B,A)
+                 "banner" : (0.1,0.3,0.3,1), 
+                 "header" : (0.1,0.35,0.15,1), 
+                 "footer" : (0.1,0.35,0.15,1),
+                 #"widecolumns" : (0.25,0.1,0.25,0.7) } # nice purple!
+                 "widecolumns" : (0.2,0.2,0.2,0.5) }
+
+DEFAULTpalette = LIGHTAQUApalette
 
 
 class Rectangle(object):
@@ -912,7 +931,9 @@ class Pyglance( pyglet.window.Window ):
             self.focus.mousedrag( x, y, dx, dy, buttons, modifiers )
 
     def on_text( self, text ):
-        if self.focus and not self.texthandled: 
+        print "on text ", text, " are we handled? ", self.texthandled
+
+        if self.focus and (not self.texthandled): 
             self.focus.dealwithtext( text )
 
     def on_text_motion( self, motion ):
@@ -959,7 +980,7 @@ class Pyglance( pyglet.window.Window ):
             elif symbol == key.V and modifiers & key.MOD_CTRL:
                 self.focus.dealwithtext( xerox.paste() )
                 self.texthandled = 1
-        # otherwise look at what it could mean for the slide or presentation
+        # otherwise look at what it could mean for the global guy
         else:
             if ( symbol == key.Q or symbol == key.ESCAPE ):
                 self.texthandled = 1
@@ -977,7 +998,7 @@ class Pyglance( pyglet.window.Window ):
             elif symbol == key.E:
                 self.loadfile( "scratch" )
 
-
+        print "key press ", symbol, " are we handled? ", self.texthandled
         return pyglet.event.EVENT_HANDLED
 
 
