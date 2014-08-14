@@ -3,10 +3,6 @@ import time, os, sys
 import config
 import shutil # for copying files
 
-EURO = "EURO"
-USD = "USD" 
-
-
 class Dough:
     ''' some amount of money, with units. '''
     def __init__( self, amount, units=config.DEFAULTcurrency ):
@@ -56,7 +52,12 @@ class Dough:
     
     def __eq__( self, other ): # ==
         ''' check if doughs are equal '''
-        other.clean()
+        if isinstance( other, Dough ):
+            other.clean()
+        elif other == 0:
+            other = Dough(0)
+        else:
+            raise Exception("Comparing dough to non-dough")
         self.clean()
 
         equal = True
@@ -258,7 +259,7 @@ class Category:
 
 #### CATEGORY CLASS
     def parse( self ):
-        #print " Parsing ", self.filename
+        print " Parsing ", self.filename
         try:
             with open(self.filename) as f:
                 content = f.readlines()
@@ -274,10 +275,10 @@ class Category:
             elif split[0][0] == "#":
                 ## commented line begins with a #
                 pass
-            elif split[0].lower() in self.allowedmetaflags:
-                # if the line is a metaflag
+            elif split[0] in self.allowedmetaflags:
+                # if the file is a metaflag
                 self.metaflags[ split[0] ] = True
-            elif split[0].lower() in self.allowedmetavalues:
+            elif split[0] in self.allowedmetavalues:
                 # then split[0] is a metavalue, and the rest is the value in EUROS
                 datastring = " ".join( split[1:] )
                 self.metavalues[split[0]] = DoughFromString( datastring )
@@ -287,8 +288,8 @@ class Category:
 
         if self.metaflags["income"] and self.metaflags["budgetenough"]:
             print "WARNING:  should not include \"income\" and \"budgetenough\" in file " +self.filename
-        if self.metaflags["budgetenough"] and "startingbalance" in self.metavalues:
-            print "WARNING:  should not specify \"startingbalance\" and \"budgetenough\" in file "+self.filename
+#        if self.metaflags["budgetenough"] and "startingbalance" in self.metavalues:
+#            print "WARNING:  should not specify \"startingbalance\" and \"budgetenough\" in file "+self.filename
             
 #### CATEGORY CLASS
     def total( self, accounts, month ):
@@ -310,6 +311,8 @@ class Category:
 
             self.metavalues["changeactual"] = totalinactual.clean()
             self.metavalues["changebudget"] = totalinbudget.clean()
+            # experimental
+            self.metavalues["endingbalance"] = (totalinactual-totalinbudget).clean()
 
             return [ totalinactual, totalinbudget  ]
 
@@ -346,6 +349,7 @@ class Category:
 
             if "startingbalance" in self.metavalues:
                 balance = self.metavalues["startingbalance"].copy()
+
             if "budget" in self.metavalues:
                 balance += self.metavalues["budget"]
 
@@ -358,9 +362,11 @@ class Category:
                     accounts[e.account] -= actuale
                 else:
                     accounts[e.account] = -actuale
-            
+           
+            if self.metaflags["budgetenough"]:
+                balance += totaloutbudget
+
             self.metavalues["endingbalance"] = balance.clean()
-            
             self.metavalues["changeactual"] = -totaloutactual.clean()
             self.metavalues["changebudget"] = -totaloutbudget.clean()
             
@@ -442,10 +448,10 @@ class Month:
                     # if it's not business related, we can budget for it
                     try:
                         catbudget = cat.metavalues["budget"]
-                        budgetenough = False
+                        #budgetenough = False
                     except KeyError:
                         # assume budget enough
-                        budgetenough = True
+                        #budgetenough = True
                         catbudget = -cat.metavalues["changebudget"]
                     
                     self.monthlyexpectedoutpour += catbudget
@@ -459,13 +465,13 @@ class Month:
                 self.totalactualspendings += catchange
 
                 # now see if there's anything hidden that we can spend this month
-                if budgetenough:
+#                if budgetenough:
+#                    catbalance = Dough(0)
+#                else:
+                try:
+                    catbalance = cat.metavalues["endingbalance"]
+                except KeyError:
                     catbalance = Dough(0)
-                else:
-                    try:
-                        catbalance = cat.metavalues["endingbalance"]
-                    except KeyError:
-                        catbalance = Dough(0)
                 
                 self.accumulatedantisavings += catbalance
 
@@ -530,7 +536,27 @@ class Month:
             if catname == "bills" or catname == "income" or catname == "giving":
                 # copy over bills and income verbatim.  you can change them yourself,
                 # but those should be fairly consistent ;)
-                shutil.copy2(os.path.join(self.rootdir,catname), filedir)
+                with open(os.path.join(self.rootdir,catname)) as f:
+                    content = f.readlines()
+
+                # the only thing that might be different is the starting balance. 
+                newcontent = []
+                fixedstartingbalance = False
+                for c in content:
+                    split = c.split()
+                    if len(split) and split[0].lower() == "startingbalance":
+                        newcontent.append("startingbalance "+str(cat.metavalues["endingbalance"])+"\n")
+                        fixedstartingbalance = True
+                    else:
+                        newcontent.append(c)
+
+                with open(filedir, 'w') as f:
+                    if not fixedstartingbalance and cat.metavalues["endingbalance"] != 0:
+                        f.write("startingbalance "+str(cat.metavalues["endingbalance"])+"\n")
+                    for c in newcontent:
+                        f.write(c)
+                        
+#                shutil.copy2(os.path.join(self.rootdir,catname), filedir)
 
             elif catname in self.accounts:
                 # an account just has a starting balance
@@ -543,15 +569,16 @@ class Month:
             else:
                 # regular category
                 with open(filedir, 'w') as f:
+                    if cat.metaflags["nocarryover"]:
+                        # unless we don't carry over
+                        f.write("nocarryover\n")
+                    elif cat.metavalues["endingbalance"] != 0:
+                        f.write("startingbalance "+str(cat.metavalues["endingbalance"])+"\n")
+
                     try:
                         # check if we have a budget, keep it the same for next month
                         catbudgetline = "budget "+str(cat.metavalues["budget"])+"\n"
                         # but if we have a budget, we also have a starting balance...
-                        if cat.metaflags["nocarryover"]:
-                            # unless we don't carry over
-                            f.write("nocarryover\n")
-                        else:
-                            f.write("startingbalance "+str(cat.metavalues["endingbalance"])+"\n")
                     except KeyError:
                         catbudgetline = "budgetenough\n"
                     

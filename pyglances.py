@@ -686,7 +686,11 @@ class Pyglance( pyglet.window.Window ):
 
         if cat.metaflags["income"]:
             catincome = cat.metavalues["changebudget"]
-            catwin.addline("      got "+str(catincome)) 
+            if cat.metavalues["endingbalance"] != 0:
+                catwin.addline("  average "+str(catincome)) 
+                catwin.addline("    slush "+str(cat.metavalues["endingbalance"])) 
+            else:
+                catwin.addline("      got "+str(catincome)) 
         else:
             try:
                 catbudget = cat.metavalues["budget"].clean()
