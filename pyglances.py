@@ -694,10 +694,10 @@ class Pyglance( pyglet.window.Window ):
         else:
             try:
                 catbudget = cat.metavalues["budget"].clean()
-                budgetenough = False
+                #budgetenough = False
             except KeyError:
                 # assume budget enough
-                budgetenough = True
+                #budgetenough = True
                 catbudget = -cat.metavalues["changebudget"].clean()
           
             if cat.name not in config.BUSINESScategories:
@@ -710,13 +710,13 @@ class Pyglance( pyglet.window.Window ):
             
             catwin.addline( "      spent "+str(catchange) )
             
-            if budgetenough:
+#            if budgetenough:
+#                catbalance = Dough(0)
+#            else:
+            try:
+                catbalance = cat.metavalues["endingbalance"]
+            except KeyError:
                 catbalance = Dough(0)
-            else:
-                try:
-                    catbalance = cat.metavalues["endingbalance"]
-                except KeyError:
-                    catbalance = Dough(0)
             
             if catbalance != Dough(0):
                 catwin.addline( "          left "+str(catbalance) )
