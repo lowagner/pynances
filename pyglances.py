@@ -556,9 +556,9 @@ class Pyglance( pyglet.window.Window ):
                 pyglet.app.exit()
             else:
                 split = commandtext.split()
-                if split[0] == "load":
+                if split[0] == "load" or split[0] == "open" or split[0] == "o":
                     if len(split) == 1:
-                        self.alert("use load YYYY/mm")
+                        self.alert("use load YYYY/mm, or open mm")
                     else:
                         args = split[1].split( os.sep )
                         if len(args) == 1:

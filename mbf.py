@@ -1,7 +1,6 @@
 # money money money, Must Be Funny, in a rich man's world....
 import time, os, sys
 import config
-import shutil # for copying files
 
 class Dough:
     ''' some amount of money, with units. '''
@@ -89,8 +88,7 @@ class Dough:
         return equal
     
     def __ne__( self, other ): # !=
-        y = ( self == other )
-        return not y
+        return not ( self == other )
 
     def __imul__( self, other ): # +=
         ''' *= a dough by a scalar '''
@@ -110,7 +108,7 @@ class Dough:
         ''' negate a copy of one's self '''
         theresult = self.copy()
         for currency in self.dough:
-            theresult.dough[ currency ] = -self.dough[currency]
+            theresult.dough[currency] = -self.dough[currency]
         return theresult
 
     def __iadd__( self, other ): # +=
@@ -122,7 +120,7 @@ class Dough:
                 elif abs(other.dough[currency]) > 1E-3:
                     self.dough[currency] = amount
         except AttributeError:
-            sys.exit("Attempting to add non-dough to a dough class")
+            raise Exception("Attempting to add non-dough to a dough class")
         return self 
 
     def __add__( self, other ):
@@ -142,7 +140,7 @@ class Dough:
                 else:
                     self.dough[currency] = -amount
         except AttributeError:
-            sys.exit("Attempting to add non-dough to a dough class")
+            raise Exception("Attempting to add non-dough to a dough class")
         return self 
 
     def __sub__( self, other ):
@@ -264,7 +262,7 @@ class Category:
             with open(self.filename) as f:
                 content = f.readlines()
         except:
-            sys.exit("Error parsing file " + self.filename)
+            raise Exception("Error parsing file " + self.filename)
         
         self.entries = []
 
@@ -555,8 +553,6 @@ class Month:
                         f.write("startingbalance "+str(cat.metavalues["endingbalance"])+"\n")
                     for c in newcontent:
                         f.write(c)
-                        
-#                shutil.copy2(os.path.join(self.rootdir,catname), filedir)
 
             elif catname in self.accounts:
                 # an account just has a starting balance
@@ -596,7 +592,7 @@ if __name__ == "__main__":
         if os.path.exists( os.path.join( currentyear, currentmonth ) ):
             month = Month( currentyear, currentmonth )
         else:
-            sys.exit(" Current month is unavailable in pynances.  Try YYYY"+os.sep+"mm" )
+            raise Exception(" Current month is unavailable in pynances.  Try YYYY"+os.sep+"mm" )
     else:
         if os.path.exists( sys.argv[1] ):
             args = sys.argv[1].split( os.sep )
