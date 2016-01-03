@@ -1,3 +1,38 @@
+
+remove accounts from config.py
+read in all files from that month, ascertain if they are an account from that metaword.
+determine the name of the account by something like this at the top of the file:
+    account Savings
+or
+    account Capital One Savings
+
+also include a "business" metaword.
+    business
+
+better parsing:  
+    if there's an error, quit program and give line number and print out line which was problem!
+    if there's multiple "from"s or "paid"s on a line, only use the last one to designate the dough.
+        could look backwards through the line split.
+
+allow for transfers between categories, e.g. between disc-A and disc-L for "tipping."
+
+mbf:
+    internally convert moneys to integers, doing integer arithmetic with pennies instead of floats.
+    inside the config file can give default precision (2 for standard use cases),
+    as well as a precision for each currency.
+
+qif:
+    make checkbox for "Edit File With Single Click".  
+        if toggled, if you click on an account, it will go to that one to edit the file.
+        if not toggled, you have to double click.
+
+    Ctrl+O will open a file dialog to edit a file.
+
+    linux needs more room for the command edit line.
+
+    Close Without Saving? dialog for when textEdit has been modified.
+
+
 Tab completion on the pynances command line.
 
 Why on mac does on_text get called before on_key_press?
