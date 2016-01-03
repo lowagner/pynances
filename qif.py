@@ -40,7 +40,7 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).resizeEvent(event)
         h = event.size().height()
         w = event.size().width()
-        if w < h:
+        if w < h or w < 600:
             # not very wide.
             self.ui.accountsWidget.resize(w/2-4, h/2-28)
             self.ui.accountsWidget.move(2,2)
