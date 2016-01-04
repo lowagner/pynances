@@ -189,10 +189,10 @@ class Dough(object):
         return " + ".join(string)
 
 
-class DoughFromString( Dough ):
+class DoughFromSplit( Dough ):
     ''' another way to get to the dough class, different initialization '''
-    def __init__( self, doughstring ):
-        doughsplit = doughstring.split()
+    def __init__( self, doughsplit ):
+        #doughsplit = doughstring.split()
         self.dough = {}
         if len(doughsplit) == 1:
             self.dough[config.DEFAULTcurrency] = _get_dough( doughsplit[0], 
@@ -209,39 +209,50 @@ class DoughFromString( Dough ):
                 self.dough[checkunits] = _get_dough( doughsplit[i], checkunits )
                 i += 3 # skip the + sign
 
-class Entry:
+class Entry(object):
     def __init__( self, info ):
         self.name = ""
-        namemode = True
+        self.recurring = False
         self.averaged = False
-        i = 0
-        while i < len(info):
-            if info[i].upper() == "PAID" or info[i].upper() == "FROM":
-                self.account = info[i+1].upper() # capitalize the account
-                i += 2 
-                namemode = False
-            elif info[i].upper() == "AVERAGE":
-                self.averaged = True
-                self.outmonths = info[i+1]
-                self.account = info[i+2].upper()
-                i += 3 
-                namemode = False
-            elif info[i].upper() == "WEEK":
-                self.week = info[i+1]
-                i += 2 
-                namemode = False
-            else:
-                if namemode:
-                    self.name += info[i] + " "
-                    i += 1
-                else:
-                    self.dough = DoughFromString( " ".join( info[i:] ) )
-                    self.dough.clean()
+        self.paidlanguage = ""
+        i = len(info)-1
+        try:
+            while i >= 0:
+                infoupper = info[i].upper()
+                if infoupper == "PAID" or infoupper == "FROM":
+                    self.name = info[:i]
+                    self.paidlanguage = info[i]
+                    self.account = info[i+1].upper() # capitalize the account
+                    i += 2
                     break
-        if len(self.name) > 1: 
-            self.name = self.name[:-1]
+                elif infoupper == "AVERAGE":
+                    self.averaged = True
+                    self.name = info[:i]
+                    self.paidlanguage = info[i] + " " + info[i+1]
+                    self.outmonths = info[i+1].upper()
+                    self.account = info[i+2].upper()
+                    i += 3
+                    break
+                i -= 1
+            if i < 0:
+                raise Exception("Entry expected a PAID/FROM/AVERAGE")
+            
+            # use index i to get the dough (probably the last few numbers and currencies):
+            self.dough = DoughFromSplit( info[i:] )
+            self.dough.clean()
+        except IndexError:
+            raise Exception("Entry expected Dough after PAID/FROM/AVERAGE")
+
+        # construct name from the list self.name
+        if len(self.name) < 1: 
+            self.name = "UNKNOWN"
         else:
-            self.name = "unknown"
+            # check for a recurring transaction
+            for word in self.name:
+                if word.upper() == "RECURRING":
+                    self.recurring = True
+                    break
+            self.name = " ".join(self.name)
 
     def budget( self ):
         return self.dough.copy()
@@ -255,58 +266,61 @@ class Entry:
         else:
             return self.budget()
 
-class Category:
-    def __init__( self, rootdir, name ):
+    def __str__( self ):
+        return " ".join([self.name, self.paidlanguage, self.account, str(self.dough)])
+        
+
+class Category(object):
+    def __init__( self, rootdir, name, accountlist ):
         self.name = name
         self.filename = os.path.join( rootdir, name )
-        self.allowedmetaflags = [ "account", # true or false flags
-                                  "income",
-                                  "budgetenough",
-                                  "nocarryover" ]
-        self.allowedmetavalues = [ "startingbalance", # meta-information with a value
-                                   "budget",
-                                   "endingbalance" ]
 
         self.metavalues = {} # is a dictionary
+
         self.metaflags = {}
-        self.accounts = {}
-        for key in self.allowedmetaflags:
+        for key in config.ALLOWEDmetaflags:
             self.metaflags[key] = False # set them all false
-        self.parse()
+        self.metaflags["account"] = None # account is a special metaflag
+
+        self.parse(accountlist)
 
 #### CATEGORY CLASS
-    def parse( self ):
+    def parse( self, accountlist ):
         print " Parsing ", self.filename
-        try:
-            with open(self.filename) as f:
-                content = f.readlines()
-        except:
-            raise Exception("Error parsing file " + self.filename)
         
         self.entries = []
-
-        for line in content:
+        self.nextmonthentries = []
+        
+        with open (self.filename) as f:
+          for line in f:
             split = line.split() # strip leading/trailing white space and split
             if len(split) == 0:
                 pass
             elif split[0][0] == "#":
                 ## commented line begins with a #
+                if len(split) > 1 and split[1].upper() == "EXPECTING":
+                    self.nextmonthentries.append(line)
                 pass
-            elif split[0] in self.allowedmetaflags:
+            elif split[0] in config.ALLOWEDmetaflags:
                 # if the file is a metaflag
                 self.metaflags[ split[0] ] = True
-            elif split[0] in self.allowedmetavalues:
+            elif split[0] == "account":
+                self.metaflags[ "account" ] = True
+                accountlist[ self.name ] = " ".join( split[1:] )
+            elif split[0] in config.ALLOWEDmetavalues:
                 # then split[0] is a metavalue, and the rest is the value in EUROS
-                datastring = " ".join( split[1:] )
-                self.metavalues[split[0]] = DoughFromString( datastring )
+                self.metavalues[split[0]] = DoughFromSplit( split[1:] )
                 self.metavalues[split[0]].clean()
             else:
-                self.entries.append( Entry(split) ) 
+                newentry = Entry(split)
+                self.entries.append( newentry ) 
+                if newentry.recurring:
+                    self.nextmonthentries.append( newentry )
 
+        if self.metaflags["account"] and self.metaflags["income"]:
+            raise Exception("do not put account and income in the same file.")
         if self.metaflags["income"] and self.metaflags["budgetenough"]:
             print "WARNING:  should not include \"income\" and \"budgetenough\" in file " +self.filename
-#        if self.metaflags["budgetenough"] and "startingbalance" in self.metavalues:
-#            print "WARNING:  should not specify \"startingbalance\" and \"budgetenough\" in file "+self.filename
             
 #### CATEGORY CLASS
     def total( self, accounts, month ):
@@ -395,7 +409,7 @@ class Category:
         
 #### END CATEGORY CLASS
 
-class Month:
+class Month(object):
     def __init__( self, YYYY, mm ):
         self.rootdir = os.path.join( YYYY, mm )
         self.year = int(YYYY)
@@ -411,31 +425,26 @@ class Month:
         for f in os.listdir( self.rootdir ):
             if not f.startswith('.'):
                 self.categorynames.append(f)
-#        self.incomefiles = [ "income", "reimburse" ]
-#        for income in self.incomefiles:
-#            if income in self.categorynames:
-#                self.categorynames.remove(income)
-        if "totals" in self.categorynames:
-            self.categorynames.remove("totals")
 
         self.categories = {}
+        self.accountlist = {}
         for catname in self.categorynames:
-            self.categories[catname] = Category( self.rootdir, catname )
+            self.categories[catname] = Category( self.rootdir, catname, self.accountlist )
         
 
     def grandtotal( self, printme=False ): 
         # the following dictionary will hold all the information about how the account
         # balances will change from this month to the next
-        self.accounts = {}
-        for account in config.ACCOUNTS:
-            self.accounts[account] = Dough(0)
+        self.deltacat = {}
+        for account in self.accountlist:
+            self.deltacat[account] = Dough(0)
 
         self.totaldeltabudget = Dough(0)
         self.totaldeltaactual = Dough(0)
         # first go through everything and get all accounts up to date
         for catname in self.categories:
             cat = self.categories[catname]
-            actual, budget = cat.total( self.accounts, #adds entries to the accounts
+            actual, budget = cat.total( self.deltacat, #adds entries to the accounts
                                         self.month ) # for the given month...
             self.totaldeltabudget += budget
             self.totaldeltaactual += actual
@@ -451,7 +460,7 @@ class Month:
             cat = self.categories[catname]
             if cat.metaflags["income"]:
                 # income category
-                if catname not in config.BUSINESScategories:
+                if not cat.metaflags["business"]:
                     # don't put business stuff in expected income
                     self.monthlyexpectedincome += cat.metavalues["changebudget"]
                 # but do put everything in actual income
@@ -461,7 +470,7 @@ class Month:
                 # not an account, some other category
                 
                 # first see what we're budgeting in each category
-                if catname not in config.BUSINESScategories:
+                if not cat.metaflags["business"]:
                     # if it's not business related, we can budget for it
                     try:
                         catbudget = cat.metavalues["budget"]
@@ -510,13 +519,13 @@ class Month:
             print "ACCOUNTS"
 
 
-        for account in config.ACCOUNTS:
+        for account in self.accountlist:
             # use the config to put it in a certain order
-            self.categories[account].metavalues["endingbalance"] += self.accounts[account]
+            self.categories[account].metavalues["endingbalance"] += self.deltacat[account]
             endmonth =  self.categories[account].metavalues["endingbalance"].clean()
 
             if printme:
-                print "money change in ", account, ": ", self.accounts[account].clean()
+                print "delta money in ", account, ": ", self.deltacat[account].clean()
                 print "   end of month account balance: ", endmonth
 
 
@@ -541,6 +550,7 @@ class Month:
                             os.unlink( path )
                     except Exception, e:
                         print e
+                        raise Exception("cannot proceed for some reason")
             else:
                 return 1
         else:
@@ -548,6 +558,10 @@ class Month:
             os.makedirs( directory )
             
         for catname in self.categories:
+            # TODO:
+            # make each category responsible for creating the next month.
+            # use "recurring" in an entry and "expecting" in a comment to put it
+            # in the next month
             cat = self.categories[catname]
             filedir = os.path.join( directory, catname )
             if catname == "bills" or catname == "income" or catname == "giving":
@@ -573,7 +587,7 @@ class Month:
                     for c in newcontent:
                         f.write(c)
 
-            elif catname in self.accounts:
+            elif cat.metaflag["account"]:
                 # an account just has a starting balance
                 with open(filedir, 'w') as f:
                     f.write("account\n")

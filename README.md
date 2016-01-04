@@ -139,12 +139,13 @@ different when adding totals and what not.
 
 ### Account files
 
-Use the `account` keyword near the top of your account files.
-Accounts should have a `startingbalance`, but no `budget`.  More on those 
-later.  Accounts should be a single word, like "D" for "Debit Account", and they should be
-listed in ACCOUNTS in config.py, with a more descriptive name in ACCOUNTnames.
+Use the `account` keyword near the top of your account files, with a descriptive account name
+following, e.g. `account Savings Account`.  Accounts should have a `startingbalance`, but no 
+`budget`.  More on those later.  To specify the account in any given purchase or transfer,
+you use the filename of the account, such as `S` in the example provided for the savings account.
 
-You can add transfers into an account by specifying, e.g.:
+You can add transfers into an account, such as your checking account, from another account
+(like the savings account saved in file `S`) by specifying, e.g.:
 
     Urgent Transfer FROM S 10 USD
 
@@ -227,8 +228,6 @@ program, and should be used with care inside of the YYYY/mm directory files.
 + `from/FROM` - case insensitive.  Immediately following a FROM you should include the account from which you are paying/transfering money.
 
 + `paid/PAID` - case insensitive.  Immediately following a PAID you should include the account from which you are paying money.
-
-+ `week/WEEK` - case insensitive.  Immediately following a week you should include the week you made the transaction.
 
 + `average/AVERAGE` - case insensitive.  Immediately following an AVERAGE come two things:  first, a concatenation of all months that the bill actually gets paid, e.g. 369D for March, June, September, and December, then the account from which it gets paid.  At the end of the line comes the monthly average drain on your account.
 

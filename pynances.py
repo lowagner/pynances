@@ -147,9 +147,7 @@ class MainScreen:
 
         starttotaldough = Dough(0)
         endtotaldough = Dough(0)
-        for i in range(len(config.ACCOUNTS)):
-            account = config.ACCOUNTS[i]
-            accountname = config.ACCOUNTnames[i]
+        for account, accountname in self.month.accountlist.iteritems():
             if line > 0 and line < acctwinheight - 1:
                 self.acctwin.addstr(line,2,accountname+" ("+account+")", curses.A_BOLD)
             line += 1
@@ -188,7 +186,7 @@ class MainScreen:
     def printcat( self, cat, line ):
         catwinheight, catwinwidth =  self.catwin.getmaxyx()
         # if not an account, it's a category we can analyze more
-        if cat.name in config.BUSINESScategories:
+        if cat.metaflags["business"]:
             if line > 0 and line < catwinheight - 1:
                 self.catwin.addstr(line,2,"Business "+str(cat.name), curses.A_BOLD)
         else:
@@ -210,7 +208,7 @@ class MainScreen:
                 catbudget = -cat.metavalues["changebudget"].clean()
           
             rightadjustx = 32
-            if cat.name not in config.BUSINESScategories:
+            if not cat.metaflags["business"]:
                 if line > 0 and line < catwinheight - 1:
                     self.catwin.addstr(line,rightadjustx,("budget "+str(catbudget)).rjust(catwinwidth-rightadjustx-2))
             line += 1
@@ -255,7 +253,7 @@ class MainScreen:
         sortedcategories.sort()
         for category in sortedcategories:
             cat = self.month.categories[category]
-            if not ( cat.metaflags["account"] or category in config.BUSINESScategories ):
+            if not ( cat.metaflags["account"] or cat.metaflags["business"]):
                 line = self.printcat( cat, line )
 
         line+=1
@@ -278,10 +276,10 @@ class MainScreen:
             self.catwin.addstr(line,5, str(self.month.accumulatedantisavings))
 
         line+= 2
-        for category in config.BUSINESScategories:
+        for category in sortedcategories:
             if category in self.month.categories:
                 cat = self.month.categories[category]
-                if not cat.metaflags["account"]:
+                if cat.metaflags["business"] and not cat.metaflags["account"]:
                     line = self.printcat( cat, line )
         line += 1
         if line > 0 and line < catwinheight - 1:

@@ -653,9 +653,7 @@ class Pyglance( pyglet.window.Window ):
 
         starttotaldough = Dough(0)
         endtotaldough = Dough(0)
-        for i in range(len(config.ACCOUNTS)):
-            account = config.ACCOUNTS[i]
-            accountname = config.ACCOUNTnames[i]
+        for account, accountname in self.month.accountlist.iteritems():
             acctwin.addline(accountname+" ("+account+")", dict(bold=True)) # true for bold
             try:
                 sbalance = self.month.categories[account].metavalues["startingbalance"]
@@ -679,7 +677,7 @@ class Pyglance( pyglet.window.Window ):
     def printcat( self, cat ):
         # if not an account, it's a category we can analyze more
         catwin = self.items[1]
-        if cat.name in config.BUSINESScategories:
+        if cat.metaflags["business"]:
             catwin.addline("Business "+str(cat.name), dict(bold=True))
         else:
             catwin.addline(str(cat.name), dict(bold=True))
@@ -700,7 +698,7 @@ class Pyglance( pyglet.window.Window ):
                 #budgetenough = True
                 catbudget = -cat.metavalues["changebudget"].clean()
           
-            if cat.name not in config.BUSINESScategories:
+            if not cat.metaflags["business"]:
                 catwin.addline( "   budget "+str(catbudget) )
 
             try:
@@ -733,7 +731,7 @@ class Pyglance( pyglet.window.Window ):
         for category in sortedcategories:
             cat = self.month.categories[category]
             # don't print accounts here, or business categories (yet)
-            if not ( cat.metaflags["account"] or category in config.BUSINESScategories ):
+            if not ( cat.metaflags["account"] or cat.metaflags["business"] ):
                 self.printcat( cat )
         
         catwin.addline()
@@ -749,10 +747,10 @@ class Pyglance( pyglet.window.Window ):
         catwin.addline()
 
         # now print business categories
-        for category in config.BUSINESScategories:
+        for category in sortedcategories:
             if category in self.month.categories:
                 cat = self.month.categories[category]
-                if not cat.metaflags["account"]:
+                if cat.metaflags["business"] and not cat.metaflags["account"]:
                     self.printcat( cat )
         
         catwin.addline() 
