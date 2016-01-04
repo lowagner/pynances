@@ -5,8 +5,6 @@ DEFAULTcurrency = "EURO"
 # these are only used for AVERAGE payment types.
 MONTHS = [ "1", "2", "3", "4", "5", "6", "7", "8", "9", "O", "N", "D" ]
 
-BUSINESScategories = [ "expenses", "reimburse" ]
-
 # money will have DEFAULTprecision numbers after the decimal point, unless
 # otherwise specified in the precision dict below.  
 #   e.g. precision = { "YEN" : 3 } to avoid the DEFAULTprecision.

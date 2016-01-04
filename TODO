@@ -1,24 +1,13 @@
-
-remove accounts from config.py
-read in all files from that month, ascertain if they are an account from that metaword.
-determine the name of the account by something like this at the top of the file:
-    account Savings
-or
-    account Capital One Savings
-
-also include a "business" metaword.
-    business
-
 better parsing:  
     if there's an error, quit program and give line number and print out line which was problem!
 
-allow for transfers between categories, e.g. between disc-A and disc-L for "tipping."
 
 mbf:
-    have generate put in the default currency in case it switches one month.
-    make generate also look for "repeating" in each line of each file to write it over.
-        or if there is a hash comment, look for "expecting"
+    allow for transfers between categories, e.g. between disc-A and disc-L for "tipping."
 
+
+general:
+    Tab completion on the pynances command line.
 
 qif:
     make checkbox for "Edit File With Single Click".  
@@ -32,9 +21,8 @@ qif:
     Close Without Saving? dialog for when textEdit has been modified.
 
 
-Tab completion on the pynances command line.
-
-Why on mac does on_text get called before on_key_press?
+pyglances:
+    Why on mac does on_text get called before on_key_press?
 
 urwid??
 
@@ -46,3 +34,5 @@ for the accounts.  but probably ok if we don't
 
 Make difference between budget and spending for non-business
 Also possibly give what's left
+
+

@@ -248,10 +248,8 @@ class Entry(object):
             self.name = "UNKNOWN"
         else:
             # check for a recurring transaction
-            for word in self.name:
-                if word.upper() == "RECURRING":
-                    self.recurring = True
-                    break
+            if self.name[0].upper() == "RECURRING":
+                self.recurring = True
             self.name = " ".join(self.name)
 
     def budget( self ):
@@ -300,13 +298,11 @@ class Category(object):
                 ## commented line begins with a #
                 if len(split) > 1 and split[1].upper() == "EXPECTING":
                     self.nextmonthentries.append(line)
-                pass
             elif split[0] in config.ALLOWEDmetaflags:
                 # if the file is a metaflag
                 self.metaflags[ split[0] ] = True
             elif split[0] == "account":
-                self.metaflags[ "account" ] = True
-                accountlist[ self.name ] = " ".join( split[1:] )
+                accountlist[ self.name ] = self.metaflags[ "account" ] = " ".join( split[1:] )
             elif split[0] in config.ALLOWEDmetavalues:
                 # then split[0] is a metavalue, and the rest is the value in EUROS
                 self.metavalues[split[0]] = DoughFromSplit( split[1:] )
@@ -315,7 +311,7 @@ class Category(object):
                 newentry = Entry(split)
                 self.entries.append( newentry ) 
                 if newentry.recurring:
-                    self.nextmonthentries.append( newentry )
+                    self.nextmonthentries.append( "%s\n"%str(newentry) )
 
         if self.metaflags["account"] and self.metaflags["income"]:
             raise Exception("do not put account and income in the same file.")
@@ -404,8 +400,25 @@ class Category(object):
             return [ -totaloutactual, -totaloutbudget ]
 
 #### CATEGORY CLASS
-    def write( self ): 
-        pass
+    def writenextmonth( self, directory ): 
+        with open( os.path.join(directory, self.name), 'w' ) as f:
+            # preludes:
+            if self.metaflags["account"]:
+                f.write("account %s\n"%self.metaflags["account"])
+            for flag in config.ALLOWEDmetaflags:
+                if self.metaflags[flag]:
+                    f.write(flag)
+                    f.write("\n")
+            if "budget" in self.metavalues:
+                f.write("budget %s\n"%self.metavalues["budget"])
+
+            if not self.metaflags["nocarryover"]:
+                f.write("startingbalance %s\n"%self.metavalues["endingbalance"])
+            
+            f.write("\n")
+            for line in self.nextmonthentries:
+                f.write(line)
+
         
 #### END CATEGORY CLASS
 
@@ -536,11 +549,11 @@ class Month(object):
             nextmonth = 1
             nextyear += 1
 
-        self.nextyear = str(nextyear)
-        self.nextmonth = format("%02d")%(nextmonth)
-        self.nextyearmonth = self.nextyear + os.sep + self.nextmonth
+        nextyear = str(nextyear)
+        nextmonth = format("%02d")%(nextmonth)
+        self.nextyearmonth = nextyear + os.sep + nextmonth
         
-        directory = os.path.join( self.nextyear, self.nextmonth )
+        directory = os.path.join( nextyear, nextmonth )
         if os.path.exists( directory ):
             if deletedir:
                 for afile in os.listdir( directory ):
@@ -556,62 +569,10 @@ class Month(object):
         else:
             # the directory does not exist, create it
             os.makedirs( directory )
-            
+           
+        # each category is responsible for writing the next month:
         for catname in self.categories:
-            # TODO:
-            # make each category responsible for creating the next month.
-            # use "recurring" in an entry and "expecting" in a comment to put it
-            # in the next month
-            cat = self.categories[catname]
-            filedir = os.path.join( directory, catname )
-            if catname == "bills" or catname == "income" or catname == "giving":
-                # copy over bills and income verbatim.  you can change them yourself,
-                # but those should be fairly consistent ;)
-                with open(os.path.join(self.rootdir,catname)) as f:
-                    content = f.readlines()
-
-                # the only thing that might be different is the starting balance. 
-                newcontent = []
-                fixedstartingbalance = False
-                for c in content:
-                    split = c.split()
-                    if len(split) and split[0].lower() == "startingbalance":
-                        newcontent.append("startingbalance "+str(cat.metavalues["endingbalance"])+"\n")
-                        fixedstartingbalance = True
-                    else:
-                        newcontent.append(c)
-
-                with open(filedir, 'w') as f:
-                    if not fixedstartingbalance and cat.metavalues["endingbalance"] != 0:
-                        f.write("startingbalance "+str(cat.metavalues["endingbalance"])+"\n")
-                    for c in newcontent:
-                        f.write(c)
-
-            elif cat.metaflag["account"]:
-                # an account just has a starting balance
-                with open(filedir, 'w') as f:
-                    f.write("account\n")
-                    f.write("startingbalance "+str(cat.metavalues["endingbalance"])+"\n")
-            elif cat.metaflags["income"]:
-                with open(filedir, 'w') as f:
-                    f.write("income\n")
-            else:
-                # regular category
-                with open(filedir, 'w') as f:
-                    if cat.metaflags["nocarryover"]:
-                        # unless we don't carry over
-                        f.write("nocarryover\n")
-                    elif cat.metavalues["endingbalance"] != 0:
-                        f.write("startingbalance "+str(cat.metavalues["endingbalance"])+"\n")
-
-                    try:
-                        # check if we have a budget, keep it the same for next month
-                        catbudgetline = "budget "+str(cat.metavalues["budget"])+"\n"
-                        # but if we have a budget, we also have a starting balance...
-                    except KeyError:
-                        catbudgetline = "budgetenough\n"
-                    
-                    f.write(catbudgetline)
+            self.categories[catname].writenextmonth( directory )
                     
         return 0
             
