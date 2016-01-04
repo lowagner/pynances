@@ -2,7 +2,36 @@
 import time, os, sys
 import config
 
-class Dough:
+def _get_dollars_pennies(amount, currency):
+    try:
+        precision = config.precision[currency]
+    except KeyError:
+        precision = config.DEFAULTprecision
+    # convert precision from number of decimal places to base 10 number:
+    poweroften = 10**precision
+   
+    # because python rounds to -infinity, we need to check
+    # if our amount is less than zero to get correct negative dollars and pennies
+    if amount < 0:
+        dollars = -(-amount / poweroften) # stuff before the decimal
+        pennies = (-amount % poweroften)
+    else:
+        pennies = amount % poweroften
+        dollars = amount / poweroften
+    
+    return (dollars, pennies, precision)
+
+def _get_dough(string, currency):
+    try:
+        precision = config.precision[currency]
+    except KeyError:
+        precision = config.DEFAULTprecision
+    # convert precision from number of decimal places to base 10 number:
+    precision = 10**precision
+  
+    return int(round(float(string)*precision))
+
+class Dough(object):
     ''' some amount of money, with units. '''
     def __init__( self, amount, units=config.DEFAULTcurrency ):
         self.dough = {} # a dictionary with money amounts.  key = units, value = amount
@@ -28,17 +57,9 @@ class Dough:
     def clean( self, units=config.DEFAULTcurrency ):
         ''' cut out any entries that are zero, unless they all are; then keep 0 in the units currency. '''
         currencies = self.dough.keys()
-        for currency in currencies:
-            if abs(int(self.dough[currency])-self.dough[currency]) < 1E-3:
-                # if the dough is an integer, get rid of the floatness
-                self.dough[currency] = int(self.dough[currency])
-            else:
-                # general getting rid of extra decimal points
-                self.dough[currency] = float( format("%.2f")%(self.dough[currency]) ) 
-                #int(100 * self.dough[currency]) *1.0/ 100 
         if len(currencies) > 1:
             for currency in currencies:
-                if abs(self.dough[currency]) < 2E-3:
+                if self.dough[currency] == 0:
                     del self.dough[currency]
             
             if len( self.dough ) == 0:
@@ -51,19 +72,20 @@ class Dough:
     
     def __eq__( self, other ): # ==
         ''' check if doughs are equal '''
+        self.clean()
         if isinstance( other, Dough ):
             other.clean()
         elif other == 0:
-            other = Dough(0)
+            for key, val in self.dough.iteritems():
+                if val != 0:
+                    return False
+            return True
         else:
             raise Exception("Comparing dough to non-dough")
-        self.clean()
-
-        equal = True
 
         if len(other.dough) != len(self.dough):
             # nonequal lengths, obviously not equal
-            equal = False
+            return False
         else:
             # equal lengths
             if set(self.dough.keys()) != set(other.dough.keys()):
@@ -71,26 +93,24 @@ class Dough:
                 if len(self.dough) == 1:
                     # if they have equal lengths, but not equal keys, they could
                     # both be equal to zero.  but if they aren't equal to zero,...
-                    if ( abs( self.dough[ self.dough.keys()[0] ]) > 1E-3 
-                        or
-                         abs( other.dough[ other.dough.keys()[0] ]) > 1E-3):
+                    if (self.dough[ self.dough.keys()[0] ] != 0 or
+                        other.dough[ other.dough.keys()[0] ] != 0):
                          # they aren't both zero, so they are not equal!
-                         equal = False
+                         return False
                 else:
-                    equal = False
+                    return False
             else:
                 # both sets of keys (currencies) are equal
                 for key in self.dough.keys():
-                    if abs( self.dough[key] - other.dough[key] ) > 1E-3:
-                        equal = False
-                        break
+                    if self.dough[key] != other.dough[key]:
+                        return False
                     
-        return equal
+        return True
     
     def __ne__( self, other ): # !=
         return not ( self == other )
 
-    def __imul__( self, other ): # +=
+    def __imul__( self, other ): 
         ''' *= a dough by a scalar '''
         for currency, amount in self.dough.iteritems():
             self.dough[currency] *= other 
@@ -111,13 +131,13 @@ class Dough:
             theresult.dough[currency] = -self.dough[currency]
         return theresult
 
-    def __iadd__( self, other ): # +=
+    def __iadd__( self, other ): 
         ''' += a dough '''
         try:
             for currency, amount in other.dough.iteritems():
                 if currency in self.dough:
                     self.dough[currency] += amount
-                elif abs(other.dough[currency]) > 1E-3:
+                elif other.dough[currency] != 0:
                     self.dough[currency] = amount
         except AttributeError:
             raise Exception("Attempting to add non-dough to a dough class")
@@ -131,7 +151,7 @@ class Dough:
         thesum += other
         return thesum
     
-    def __isub__( self, other ): # +=
+    def __isub__( self, other ): 
         ''' -= a dough '''
         try:
             for currency, amount in other.dough.iteritems():
@@ -144,7 +164,7 @@ class Dough:
         return self 
 
     def __sub__( self, other ):
-        ''' add two doughs '''
+        ''' subtract two doughs '''
         # first we make a copy of the self into "thedifference"
         thedifference = self.copy()
         # then we add the other dough
@@ -153,18 +173,20 @@ class Dough:
 
     def __str__( self ):
         ''' print function '''
-        string = "" 
-        numcurrenciesleft = len(self.dough)
+        string = []
         for currency, amount in self.dough.iteritems():
-            numcurrenciesleft -= 1
-            if isinstance(amount, int):
-                string += str(amount) + " " + currency
-            else:
-                string += format("%.2f")%(amount) + " " + currency
-            if numcurrenciesleft:
-                string += " + "
+            # determine how many pennies (or thousandths, etc.)
+            # we need based on the currency's precision:
+            dollars, pennies, precision = _get_dollars_pennies(amount, currency)
             
-        return string 
+            # now format the dollars and pennies:
+            if pennies:
+                form = "".join(["%d.%0", str(precision), "d %s"])
+                string.append( form%(dollars, pennies, currency) )
+            else:
+                string.append( "%d %s"%(dollars, currency))
+            
+        return " + ".join(string)
 
 
 class DoughFromString( Dough ):
@@ -173,9 +195,8 @@ class DoughFromString( Dough ):
         doughsplit = doughstring.split()
         self.dough = {}
         if len(doughsplit) == 1:
-            self.dough[config.DEFAULTcurrency] = float( doughsplit[0] )
-            if abs(self.dough[config.DEFAULTcurrency] - int(self.dough[config.DEFAULTcurrency]) ) < 1E-3:
-                self.dough[config.DEFAULTcurrency] = int(self.dough[config.DEFAULTcurrency])
+            self.dough[config.DEFAULTcurrency] = _get_dough( doughsplit[0], 
+                config.DEFAULTcurrency)
         else:
             i = 0
             while i < len(doughsplit):
@@ -185,9 +206,7 @@ class DoughFromString( Dough ):
                         checkunits = "EURO"
                 except IndexError:
                     checkunits = config.DEFAULTcurrency
-                self.dough[checkunits] = float( doughsplit[i] )
-                if abs(self.dough[checkunits] - int(self.dough[checkunits]) ) < 1E-3:
-                    self.dough[checkunits] = int(self.dough[checkunits])
+                self.dough[checkunits] = _get_dough( doughsplit[i], checkunits )
                 i += 3 # skip the + sign
 
 class Entry:

@@ -17,9 +17,13 @@ better parsing:
 allow for transfers between categories, e.g. between disc-A and disc-L for "tipping."
 
 mbf:
-    internally convert moneys to integers, doing integer arithmetic with pennies instead of floats.
     inside the config file can give default precision (2 for standard use cases),
     as well as a precision for each currency.
+
+    have generate put in the default currency in case it switches one month.
+    make generate also look for "repeating" in each line of each file to write it over.
+        or if there is a hash comment, look for "expecting"
+
 
 qif:
     make checkbox for "Edit File With Single Click".  
