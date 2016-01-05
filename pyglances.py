@@ -653,7 +653,11 @@ class Pyglance( pyglet.window.Window ):
 
         starttotaldough = Dough(0)
         endtotaldough = Dough(0)
-        for account, accountname in self.month.accountlist.iteritems():
+
+        accounts = self.month.accountlist.keys()
+        accounts.sort()
+        for account in accounts:
+            accountname = self.month.accountlist[account]
             acctwin.addline(accountname+" ("+account+")", dict(bold=True)) # true for bold
             try:
                 sbalance = self.month.categories[account.upper()].metavalues["startingbalance"]

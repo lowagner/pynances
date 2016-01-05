@@ -29,7 +29,7 @@ Run any of these commands...
     python pynances.py YYYY/mm
     python pyglances.py YYYY/mm
 
-where YYYY and mm are the year (e.g. YYYY = 2014) and month 
+where YYYY and mm are the year (e.g. YYYY = 2016) and month 
 (mm = 01 for January, ..., 12 = December) that you wish to investigate.
 If you leave off YYYY/mm, you get the current month and year.
 On Windows you should use backslashes.
@@ -221,11 +221,17 @@ program, and should be used with care inside of the YYYY/mm directory files.
 
 + `income` - see "Income files" above.
 
++ `business` - a business income or category indicates reimbursements and expenses paid by your company.
+
 + `budget` - for a spending category, the monthly amount you think you will spend.
 
 + `budgetenough` - budget to pay as much as the spending category requires.
 
 + `from/FROM` - case insensitive.  Immediately following a FROM you should include the account from which you are paying/transfering money.
+
++ `recurring/RECURRING` - case insensitive.  First word on an payment/entry which indicates it should be repeated next month.
+
++ `expecting/EXPECTING` - case insensitive.  First word following `# ` (a hash followed by a space) at the front of a line, to be repeated next month.
 
 + `paid/PAID` - case insensitive.  Immediately following a PAID you should include the account from which you are paying money.
 

@@ -147,7 +147,10 @@ class MainScreen:
 
         starttotaldough = Dough(0)
         endtotaldough = Dough(0)
-        for account, accountname in self.month.accountlist.iteritems():
+        accounts = self.month.accountlist.keys()
+        accounts.sort()
+        for account in accounts:
+            accountname = self.month.accountlist[account]
             if line > 0 and line < acctwinheight - 1:
                 self.acctwin.addstr(line,2,accountname+" ("+account+")", curses.A_BOLD)
             line += 1
