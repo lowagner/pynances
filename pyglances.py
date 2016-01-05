@@ -656,13 +656,13 @@ class Pyglance( pyglet.window.Window ):
         for account, accountname in self.month.accountlist.iteritems():
             acctwin.addline(accountname+" ("+account+")", dict(bold=True)) # true for bold
             try:
-                sbalance = self.month.categories[account].metavalues["startingbalance"]
+                sbalance = self.month.categories[account.upper()].metavalues["startingbalance"]
             except KeyError:
                 sbalance = Dough(0)
             acctwin.addline("    start "+str(sbalance))
             starttotaldough += sbalance
 
-            ebalance = self.month.categories[account].metavalues["endingbalance"]
+            ebalance = self.month.categories[account.upper()].metavalues["endingbalance"]
             acctwin.addline("     end "+str(ebalance))
             endtotaldough += ebalance
             acctwin.addline() 
@@ -683,13 +683,18 @@ class Pyglance( pyglet.window.Window ):
             catwin.addline(str(cat.name), dict(bold=True))
 
         if cat.metaflags["income"]:
-            if cat.metavalues["endingbalance"] != 0:
-                catincome = cat.metavalues["changebudget"]
-                catwin.addline("  average "+str(catincome)) 
-                catwin.addline("    swing "+str(cat.metavalues["endingbalance"])) 
+            catactual = cat.metavalues["changeactual"]
+            catbudget = cat.metavalues["changebudget"]
+            if catactual != catbudget:
+                catend = cat.metavalues["endingbalance"]
+                if catend != 0:
+                    catwin.addline("  average "+str(catbudget)) 
+                    catwin.addline("    swing "+str(catend)) 
+                else:
+                    catwin.addline("      got "+str(catactual)) 
+                    catwin.addline("  average "+str(catbudget)) 
             else:
-                catincome = cat.metavalues["changeactual"]
-                catwin.addline("      got "+str(catincome)) 
+                catwin.addline("      got "+str(catactual)) 
         else:
             try:
                 catbudget = cat.metavalues["budget"].clean()

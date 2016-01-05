@@ -332,19 +332,17 @@ class Category(object):
             totalinbudget = Dough(0)
             totalinactual = Dough(0)
 
-            print "income start balance = ", self.metavalues["endingbalance"]
             for e in self.entries:
                 # if the income is averaged over many months...
                 actuale = e.actual( month )
                 totalinactual += actuale
                 totalinbudget += e.budget()
-                print e, "actual in = ", actuale, "budgeting ", e.budget()
     
-                if e.account not in categories:
+                if e.account.upper() not in categories:
                     raise Exception("Unknown category/account:  %s.\n Offending Line:  %s" % (e.account, str(e)))
                     
-                if categories[e.account].metaflags["account"]:
-                    categories[e.account].metavalues["endingbalance"] += actuale
+                if categories[e.account.upper()].metaflags["account"]:
+                    categories[e.account.upper()].metavalues["endingbalance"] += actuale
                 else:
                     raise Exception("Must send income to an account, not a spending/saving category (e.g. %s).\n Offending Line:  %s" % (e.account, str(e)))
 
@@ -363,12 +361,12 @@ class Category(object):
                 actuale = e.actual( month )
                 deltabalance += actuale
          
-                if e.account not in categories:
+                if e.account.upper() not in categories:
                     raise Exception("Unknown category/account:  %s.\n Offending Line:  %s" % (e.account, str(e)))
                 # even though this account is getting money in,
                 # the account which we used to get the money in must be debited!
-                if categories[e.account].metaflags["account"]:
-                    categories[e.account].metavalues["endingbalance"] -= actuale
+                if categories[e.account.upper()].metaflags["account"]:
+                    categories[e.account.upper()].metavalues["endingbalance"] -= actuale
                 else:
                     raise Exception("Must transfer between accounts, not into/from a spending/saving category (e.g. %s).\n Offending Line:  %s" % (e.account, str(e)))
             
@@ -387,18 +385,18 @@ class Category(object):
             for e in self.entries:
                 actuale = e.actual( month )
                 
-                if e.account not in categories:
+                if e.account.upper() not in categories:
                     raise Exception("Unknown category/account:  %s.\n Offending Line:  %s" % (e.account, str(e)))
 
-                if categories[e.account].metaflags["account"]:
+                if categories[e.account.upper()].metaflags["account"]:
                     # the account which we used to get the money in must be debited!
-                    categories[e.account].metavalues["endingbalance"] -= actuale
+                    categories[e.account.upper()].metavalues["endingbalance"] -= actuale
                     totaloutactual += actuale
                     totaloutbudget += e.budget()
                     deltabalance -= actuale
                 else:
                     # take from one category...
-                    categories[e.account].metavalues["endingbalance"] -= actuale
+                    categories[e.account.upper()].metavalues["endingbalance"] -= actuale
                     # and give it to this one:
                     deltabalance += actuale
            
@@ -456,7 +454,7 @@ class Month(object):
         self.categories = {}
         self.accountlist = {}
         for catname in self.categorynames:
-            self.categories[catname] = Category( self.rootdir, catname, self.accountlist )
+            self.categories[catname.upper()] = Category( self.rootdir, catname, self.accountlist )
         
 
     def grandtotal( self, printme=False ): 
@@ -465,7 +463,7 @@ class Month(object):
         self.totaldeltaactual = Dough(0)
         # first go through everything and get all accounts up to date
         for catname in self.categories:
-            cat = self.categories[catname]
+            cat = self.categories[catname.upper()]
             actual, budget = cat.total( self.categories,
                                         self.month ) # for the given month...
             self.totaldeltabudget += budget
@@ -479,7 +477,7 @@ class Month(object):
         self.totalactualincome = Dough(0)
         self.totalactualspendings = Dough(0)
         for catname in self.categories:
-            cat = self.categories[catname]
+            cat = self.categories[catname.upper()]
             if cat.metaflags["income"]:
                 # income category
                 if not cat.metaflags["business"]:
@@ -534,8 +532,8 @@ class Month(object):
 
 
         for account in self.accountlist:
-            endmonth = self.categories[account].metavalues["endingbalance"].clean()
-            deltamonth = endmonth - self.categories[account].metavalues["startingbalance"]
+            endmonth = self.categories[account.upper()].metavalues["endingbalance"].clean()
+            deltamonth = endmonth - self.categories[account.upper()].metavalues["startingbalance"]
             deltamonth.clean()
 
             if printme:
@@ -573,7 +571,7 @@ class Month(object):
            
         # each category is responsible for writing the next month:
         for catname in self.categories:
-            self.categories[catname].writenextmonth( directory )
+            self.categories[catname.upper()].writenextmonth( directory )
                     
         return 0
             

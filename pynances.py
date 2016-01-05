@@ -152,7 +152,7 @@ class MainScreen:
                 self.acctwin.addstr(line,2,accountname+" ("+account+")", curses.A_BOLD)
             line += 1
             try:
-                sbalance = self.month.categories[account].metavalues["startingbalance"]
+                sbalance = self.month.categories[account.upper()].metavalues["startingbalance"]
             except KeyError:
                 sbalance = Dough(0)
             starttotaldough += sbalance
@@ -160,7 +160,7 @@ class MainScreen:
                 self.acctwin.addstr(line,3,"start "+str(sbalance))
             line += 1
 
-            ebalance = self.month.categories[account].metavalues["endingbalance"]
+            ebalance = self.month.categories[account.upper()].metavalues["endingbalance"]
             if line > 0 and line < acctwinheight - 1:
                 self.acctwin.addstr(line,5,"end "+str(ebalance))
             line += 1
