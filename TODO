@@ -4,6 +4,11 @@ better parsing:
 
 mbf:
     allow for transfers between categories, e.g. between disc-A and disc-L for "tipping."
+        EXPERIMENTAL!!!
+    
+    need to adjust changeactual and changebudget to deal with tipping.
+    also need to adjust endingbalance for an income category
+
 
 
 general:

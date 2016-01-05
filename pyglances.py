@@ -683,11 +683,12 @@ class Pyglance( pyglet.window.Window ):
             catwin.addline(str(cat.name), dict(bold=True))
 
         if cat.metaflags["income"]:
-            catincome = cat.metavalues["changebudget"]
             if cat.metavalues["endingbalance"] != 0:
+                catincome = cat.metavalues["changebudget"]
                 catwin.addline("  average "+str(catincome)) 
-                catwin.addline("    slush "+str(cat.metavalues["endingbalance"])) 
+                catwin.addline("    swing "+str(cat.metavalues["endingbalance"])) 
             else:
+                catincome = cat.metavalues["changeactual"]
                 catwin.addline("      got "+str(catincome)) 
         else:
             try:

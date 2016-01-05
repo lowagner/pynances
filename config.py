@@ -17,5 +17,4 @@ ALLOWEDmetaflags = [ "income", # flags which are either there or not
                      "nocarryover",
                      "business" ]
 ALLOWEDmetavalues = [ "startingbalance", # meta-information with a value
-                      "budget",
-                      "endingbalance" ]
+                      "budget" ]
