@@ -461,8 +461,8 @@ class Category(object):
 #### END CATEGORY CLASS
 
 class Month(object):
-    def __init__( self, YYYY, mm ):
-        self.rootdir = os.path.join( YYYY, mm )
+    def __init__( self, path, YYYY, mm ):
+        self.rootdir = os.path.join( path, YYYY, mm )
         self.year = int(YYYY)
         self.month = int(mm)
         self.names = ["January", "February", "March", "April", "May", "June",
@@ -609,14 +609,14 @@ if __name__ == "__main__":
         currentyear = time.strftime("%Y")   # 2014, etc.
         currentmonth = time.strftime("%m")  # 01 = jan, ..., 12 = dec
         if os.path.exists( os.path.join( currentyear, currentmonth ) ):
-            month = Month( currentyear, currentmonth )
+            month = Month( ".", currentyear, currentmonth )
         else:
             raise Exception(" Current month is unavailable in pynances.  Try YYYY"+os.sep+"mm" )
     else:
         if os.path.exists( sys.argv[1] ):
             args = sys.argv[1].split( os.sep )
             YYYY, mm = args[0], args[1]
-            month = Month( YYYY, mm )
+            month = Month( ".", YYYY, mm )
         else:
             sys.exit(" Month "+sys.argv[1]+" is unavailable in pynances.  Try YYYY"+os.sep+"mm" )
 

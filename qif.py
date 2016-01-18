@@ -237,15 +237,15 @@ class MainWindow(QMainWindow):
                 # not very wide.
                 self.ui.accountsWidget.resize(w/2-4, h/2-46)
                 self.ui.accountsWidget.move(2,0)
-                self.ui.totalsAccounts.resize(w/2-4,80)
+                self.ui.totalsAccounts.resize(w/2-4,90)
                 self.ui.totalsAccounts.move(2,h/2-42)
                 self.ui.categoriesWidget.resize(w/2-4, h/2-46)
                 self.ui.categoriesWidget.move(w/2+2, 0)
-                self.ui.totalsCategories.resize(w/2-4,80)
+                self.ui.totalsCategories.resize(w/2-4,90)
                 self.ui.totalsCategories.move(w/2+2,h/2-42)
 
-                self.ui.textEdit.resize(w-4, h/2-129)
-                self.ui.textEdit.move(2, h/2+42)
+                self.ui.textEdit.resize(w-4, h/2-139)
+                self.ui.textEdit.move(2, h/2+52)
                 
                 self.ui.lineEdit.resize(w-4, 32)
                 self.ui.lineEdit.move(2, h-86)
@@ -273,7 +273,7 @@ class MainWindow(QMainWindow):
         self.ui.totalsCategories.clear()
 
         if self.rootdir:
-            self.month = Month(self.YYYY, self.mm)
+            self.month = Month(self.rootdir, self.YYYY, self.mm)
             self.month.grandtotal()
             self.showAccounts()
             self.showCategories()

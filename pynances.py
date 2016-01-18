@@ -147,10 +147,7 @@ class MainScreen:
 
         starttotaldough = Dough(0)
         endtotaldough = Dough(0)
-        accounts = self.month.accountlist.keys()
-        accounts.sort()
-        for account in accounts:
-            accountname = self.month.accountlist[account]
+        for account, accountname in self.month.accountlist.iteritems():
             if line > 0 and line < acctwinheight - 1:
                 self.acctwin.addstr(line,2,accountname+" ("+account+")", curses.A_BOLD)
             line += 1
@@ -455,7 +452,7 @@ def main( screen, month ):
 
                     path = os.path.join( YYYY, mm )
                     if os.path.exists( path ):
-                        month = Month( YYYY, mm )
+                        month = Month( ".", YYYY, mm )
                         month.grandtotal()
                         mainscreen = MainScreen( screen, month )
                     else:
@@ -513,14 +510,14 @@ if __name__=="__main__":
         currentyear = time.strftime("%Y")   # 2014, etc.
         currentmonth = time.strftime("%m")  # 01 = jan, ..., 12 = dec
         if os.path.exists( os.path.join( currentyear, currentmonth ) ):
-            month = Month( currentyear, currentmonth )
+            month = Month( ".", currentyear, currentmonth )
         else:
             sys.exit(" Current month is unavailable in pynances.  Try YYYY"+os.sep+"mm" )
     else:
         if os.path.exists( sys.argv[1] ):
             args = sys.argv[1].split( os.sep )
             YYYY, mm = args[0], args[1]
-            month = Month( YYYY, mm )
+            month = Month( ".", YYYY, mm )
         else:
             sys.exit(" Month "+sys.argv[1]+" is unavailable in pynances.  Try YYYY"+os.sep+"mm" )
 

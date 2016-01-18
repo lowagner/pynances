@@ -615,7 +615,7 @@ class Pyglance( pyglet.window.Window ):
     def setyearmonth( self, YYYY, mm, errormsg=["YEAR","MONTH"] ):
         path = os.path.join( YYYY, mm )
         if os.path.exists( path ):
-            self.month = Month( YYYY, mm )
+            self.month = Month( ".", YYYY, mm )
             self.YYYY = YYYY
             self.mm = mm
             self.month.grandtotal()
@@ -758,10 +758,9 @@ class Pyglance( pyglet.window.Window ):
 
         # now print business categories
         for category in sortedcategories:
-            if category in self.month.categories:
-                cat = self.month.categories[category]
-                if cat.metaflags["business"] and not cat.metaflags["account"]:
-                    self.printcat( cat )
+            cat = self.month.categories[category]
+            if cat.metaflags["business"] and not cat.metaflags["account"]:
+                self.printcat( cat )
         
         catwin.addline() 
 
