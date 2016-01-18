@@ -324,6 +324,9 @@ class Category(object):
                 print "Warning, expected to see a startingbalance in account", self.name
             self.metavalues["startingbalance"] = Dough(0)
         self.metavalues["endingbalance"] = self.metavalues["startingbalance"].copy()
+        
+        self.metavalues["changeactual"] = Dough(0)
+        self.metavalues["changebudget"] = Dough(0)
             
 #### CATEGORY CLASS
     def total( self, categories, month ):
@@ -335,14 +338,18 @@ class Category(object):
             for e in self.entries:
                 # if the income is averaged over many months...
                 actuale = e.actual( month )
+                budgete = e.budget()
                 totalinactual += actuale
-                totalinbudget += e.budget()
-    
-                if e.account.upper() not in categories:
+                totalinbudget += budgete
+   
+                accounte = e.account.upper()
+                if accounte not in categories:
                     raise Exception("Unknown category/account:  %s.\n Offending Line:  %s" % (e.account, str(e)))
                     
-                if categories[e.account.upper()].metaflags["account"]:
-                    categories[e.account.upper()].metavalues["endingbalance"] += actuale
+                if categories[accounte].metaflags["account"]:
+                    categories[accounte].metavalues["endingbalance"] += actuale
+                    categories[accounte].metavalues["changeactual"] += actuale
+                    categories[accounte].metavalues["changebudget"] += budgete
                 else:
                     raise Exception("Must send income to an account, not a spending/saving category (e.g. %s).\n Offending Line:  %s" % (e.account, str(e)))
 
@@ -359,14 +366,20 @@ class Category(object):
             deltabalance = Dough(0)
             for e in self.entries:
                 actuale = e.actual( month )
+                budgete = e.budget()
                 deltabalance += actuale
-         
-                if e.account.upper() not in categories:
+        
+                accounte = e.account.upper()
+                if accounte not in categories:
                     raise Exception("Unknown category/account:  %s.\n Offending Line:  %s" % (e.account, str(e)))
                 # even though this account is getting money in,
                 # the account which we used to get the money in must be debited!
-                if categories[e.account.upper()].metaflags["account"]:
-                    categories[e.account.upper()].metavalues["endingbalance"] -= actuale
+                if categories[accounte].metaflags["account"]:
+                    categories[accounte].metavalues["endingbalance"] -= actuale
+                    categories[accounte].metavalues["changeactual"] -= actuale
+                    self.metavalues["changeactual"] += actuale
+                    categories[accounte].metavalues["changebudget"] -= budgete
+                    self.metavalues["changebudget"] += budgete
                 else:
                     raise Exception("Must transfer between accounts, not into/from a spending/saving category (e.g. %s).\n Offending Line:  %s" % (e.account, str(e)))
             
@@ -384,21 +397,36 @@ class Category(object):
 
             for e in self.entries:
                 actuale = e.actual( month )
-                
-                if e.account.upper() not in categories:
+                budgete = e.budget()
+               
+                accounte = e.account.upper()
+                if accounte not in categories:
                     raise Exception("Unknown category/account:  %s.\n Offending Line:  %s" % (e.account, str(e)))
 
-                if categories[e.account.upper()].metaflags["account"]:
+                if categories[accounte].metaflags["account"]:
                     # the account which we used to get the money in must be debited!
-                    categories[e.account.upper()].metavalues["endingbalance"] -= actuale
+                    categories[accounte].metavalues["endingbalance"] -= actuale
                     totaloutactual += actuale
-                    totaloutbudget += e.budget()
+                    totaloutbudget += budgete
                     deltabalance -= actuale
+                    
+                    # take out money from that account, 
+                    categories[accounte].metavalues["changeactual"] -= actuale
+                    categories[accounte].metavalues["changebudget"] -= budgete
+                   
+                    # diminish the money in this category:
+                    self.metavalues["changeactual"] -= actuale
+                    self.metavalues["changebudget"] -= budgete
                 else:
                     # take from one category...
-                    categories[e.account.upper()].metavalues["endingbalance"] -= actuale
+                    categories[accounte].metavalues["endingbalance"] -= actuale
                     # and give it to this one:
                     deltabalance += actuale
+                    
+                    categories[accounte].metavalues["changeactual"] -= actuale
+                    self.metavalues["changeactual"] += actuale
+                    categories[accounte].metavalues["changebudget"] -= budgete
+                    self.metavalues["changebudget"] += budgete
            
             if "budget" in self.metavalues:
                 deltabalance += self.metavalues["budget"]
@@ -406,8 +434,6 @@ class Category(object):
                 deltabalance += totaloutbudget
 
             self.metavalues["endingbalance"] += deltabalance.clean()
-            self.metavalues["changeactual"] = -totaloutactual.clean()
-            self.metavalues["changebudget"] = -totaloutbudget.clean()
             
             return [ -totaloutactual, -totaloutbudget ]
 
