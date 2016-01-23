@@ -1,7 +1,7 @@
 DEFAULTcurrency = "EURO"
 # DEFAULTcurrency = "USD"
 
-# one character abbreviations for months.  should not be equal to any of the above ACCOUNTS... probably.
+# one character abbreviations for months.  
 # these are only used for AVERAGE payment types.
 MONTHS = [ "1", "2", "3", "4", "5", "6", "7", "8", "9", "O", "N", "D" ]
 
