@@ -1,3 +1,41 @@
+import os, time
+
+def getrootYYYYmm(args, mayberoot="."):
+    # get the year and month from args, if possible.
+    YYYY = None
+    mm = None
+    if len(args) == 1:
+        # only one argument supplied to sys, i.e. this program
+        YYYY = time.strftime("%Y")   # 2014, etc.
+        mm = time.strftime("%m")  # 01 = jan, ..., 12 = dec
+        if os.path.exists(os.path.join(mayberoot, YYYY, mm)):
+            rootdir = mayberoot
+    else:
+        split = args[1].split(os.sep)
+        print split
+        if len(split) == 1: # just a month probably...
+            YYYY = time.strftime("%Y")   # 2014, etc.
+            if os.path.exists(os.path.join(mayberoot, YYYY, split[0])):
+                rootdir = mayberoot
+                mm = split[0]
+        elif len(split) == 2: # probably year and month
+            YYYY, mm = split[0], split[1]
+            if os.path.exists(os.path.join(mayberoot, YYYY, mm)):
+                rootdir = mayberoot
+        else: # probably a full path
+            if split[0] == "~":
+                split[0] = os.path.expanduser("~")
+            rootdir = os.sep.join(split[:-2])
+            YYYY, mm = split[-2], split[-1]
+            if not os.path.exists(os.path.join(rootdir, YYYY, mm)):
+                rootdir = None
+
+    if YYYY is None or mm is None:
+        print "got YYYY, mm ", YYYY, mm
+        rootdir = None
+
+    return rootdir, YYYY, mm
+
 class History(object):
     def __init__(self):
         self.commands = []

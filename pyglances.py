@@ -409,6 +409,8 @@ class Pyglance( pyglet.window.Window ):
     def __init__(self, *args, **kwargs):
         # run the pyglet window initialization
         super(Pyglance, self).__init__(900, 550, resizable=True, caption="Pyglance")
+        self.rootdir = None
+
         # SET PRE DEFAULTS
         self.palette = DEFAULTpalette
         self.texthandled = True
@@ -557,18 +559,15 @@ class Pyglance( pyglet.window.Window ):
             else:
                 split = commandtext.split()
                 if split[0] == "load" or split[0] == "open" or split[0] == "o":
+                    self.loadfile("scratch")
                     if len(split) == 1:
                         self.alert("use load YYYY/mm, or open mm")
                     else:
-                        args = split[1].split( os.sep )
-                        if len(args) == 1:
-                            YYYY = self.YYYY
-                            mm = args[0]
+                        root, YYYY, mm = getrootYYYYmm(split, self.rootdir)
+                        if root:
+                            self.setyearmonth(root, YYYY, mm)
                         else:
-                            YYYY, mm = args[0], args[1]
-                        self.setyearmonth( YYYY, mm, split[1:] )
-
-                    self.loadfile("scratch")
+                            self.alert("not valid directory")
                 
                 elif split[0] == "reload":
                     self.reload()
@@ -612,10 +611,11 @@ class Pyglance( pyglet.window.Window ):
             self.alert("saved: "+self.editfiledir+" and reloaded", 5)
 
 ##  CLASS PYGLANCE
-    def setyearmonth( self, YYYY, mm, errormsg=["YEAR","MONTH"] ):
-        path = os.path.join( YYYY, mm )
+    def setyearmonth( self, root, YYYY, mm, errormsg=["YEAR","MONTH"] ):
+        path = os.path.join( root, YYYY, mm )
         if os.path.exists( path ):
-            self.month = Month( ".", YYYY, mm )
+            self.month = Month( root, YYYY, mm )
+            self.rootdir = root
             self.YYYY = YYYY
             self.mm = mm
             self.month.grandtotal()
@@ -625,7 +625,7 @@ class Pyglance( pyglet.window.Window ):
             self.alert(" ".join(errormsg)+" is unavailable." )
 
     def reload( self ):
-        self.setyearmonth( self.YYYY, self.mm, ["this","should","work"] )
+        self.setyearmonth( self.rootdir, self.YYYY, self.mm, ["this","should","work"] )
         self.alert(self.month.name+" reloaded!", 5)
 
     def load( self ):
@@ -1028,24 +1028,10 @@ class Pyglance( pyglet.window.Window ):
 
 
 if __name__=="__main__":
-    if len(sys.argv) == 1:
-        # only one argument supplied to sys, i.e. this program
-        currentyear = time.strftime("%Y")   # 2014, etc.
-        currentmonth = time.strftime("%m")  # 01 = jan, ..., 12 = dec
-        if os.path.exists( os.path.join( currentyear, currentmonth ) ):
-            presenter = Pyglance()
-            presenter.setyearmonth( currentyear, currentmonth )
-            presenter.gotime()
-        else:
-            sys.exit(" Current month is unavailable in pynances.  Try YYYY"+os.sep+"mm" )
+    root, YYYY, mm = getrootYYYYmm(sys.argv)
+    if root:
+        presenter = Pyglance()
+        presenter.setyearmonth( root, YYYY, mm )
+        presenter.gotime()
     else:
-        if os.path.exists( sys.argv[1] ):
-            args = sys.argv[1].split( os.sep )
-            YYYY, mm = args[0], args[1]
-            presenter = Pyglance()
-            presenter.setyearmonth( YYYY, mm )
-            presenter.gotime()
-        else:
-            sys.exit(" Month "+sys.argv[1]+" is unavailable in pynances.  Try YYYY"+os.sep+"mm" )
-
-
+        sys.exit(" Month is unavailable in pynances.  Try YYYY"+os.sep+"mm" )

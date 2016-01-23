@@ -2,7 +2,6 @@
 __version__ = "0.1a"
 
 from mbf import *
-from history import *
 
 import sys
 import platform
@@ -17,34 +16,7 @@ class MainWindow(QMainWindow):
     def __init__(self, args, parent=None):
         super(MainWindow, self).__init__(parent)
      
-        # get the year and month from args, if possible.
-        self.YYYY = None
-        self.mm = None
-        if len(args) == 1:
-            # only one argument supplied to sys, i.e. this program
-            self.YYYY = time.strftime("%Y")   # 2014, etc.
-            self.mm = time.strftime("%m")  # 01 = jan, ..., 12 = dec
-            if os.path.exists(os.path.join(self.YYYY, self.mm)):
-                self.rootdir = "."
-        else:
-            split = args[1].split(os.sep)
-            if len(split) == 1:
-                self.YYYY = time.strftime("%Y")   # 2014, etc.
-                if os.path.exists(os.path.join(self.YYYY, split[0])):
-                    self.rootdir = "."
-                    self.mm = split[0]
-            elif os.path.exists(args[1]):
-                if len(split) == 2:
-                    self.rootdir = "."
-                    self.YYYY, self.mm = split[0], split[1]
-                else:
-                    self.rootdir = os.sep.join(split[:-2])
-                    self.YYYY, self.mm = split[-2], split[-1]
-
-        if self.YYYY is None or self.mm is None:
-            self.YYYY = None
-            self.mm = None
-            self.rootdir = None
+        self.rootdir, self.YYYY, self.mm = getrootYYYYmm(args)
 
         self.openfile = None
         self.filename = "UNKNOWN FILE"

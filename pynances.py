@@ -320,7 +320,7 @@ class MainScreen:
         self.screen.addstr(self.cmdheight, 1, cmdstring, curses.A_REVERSE)
         self.screen.refresh()
         curses.echo()
-        s = self.screen.getstr( self.cmdheight, len(cmdstring)+2, 20 )
+        s = self.screen.getstr( self.cmdheight, len(cmdstring)+2, 64 )
         # set back to no echo
         curses.noecho()
         self.screen.addstr(self.cmdheight, 1, "                               ")
@@ -420,7 +420,7 @@ class MainScreen:
 
 
 # define a main function
-def main( screen, month ): 
+def main( screen, month, rootdir ): 
     mainscreen = MainScreen( screen, month )
     c = 0
     while c != 27:
@@ -442,21 +442,19 @@ def main( screen, month ):
                     month.reset()
                     month.grandtotal()
                     mainscreen = MainScreen( screen, month )
-                elif split[0] == "load":
-                    args = split[1].split( os.sep )
-                    if len(args) == 1:
-                        YYYY = str(month.year)
-                        mm = args[0]
-                    else:
-                        YYYY, mm = args[0], args[1]
 
-                    path = os.path.join( YYYY, mm )
-                    if os.path.exists( path ):
-                        month = Month( ".", YYYY, mm )
-                        month.grandtotal()
-                        mainscreen = MainScreen( screen, month )
+                elif split[0] == "load" or split[0] == "open":
+                    if len(split) == 1:
+                        mainscreen.show("use load YYYY/mm, or open mm")
                     else:
-                        mainscreen.show(split[1]+" is unavailable." )
+                        root, YYYY0, mm = getrootYYYYmm(split, rootdir)
+                        if root:
+                            month = Month( root, YYYY, mm )
+                            month.grandtotal()
+                            mainscreen = MainScreen( screen, month )
+                            rootdir = root
+                        else:
+                            mainscreen.show("not valid directory")
                     
                 elif s == "generate":
                     if month.generatenextmonth():
@@ -505,28 +503,18 @@ def main( screen, month ):
 # run the main function only if this module is executed as the main script
 # (if you import this as a module then nothing is executed)
 if __name__=="__main__":
-    if len(sys.argv) == 1:
-        # only one argument supplied to sys, i.e. this program
-        currentyear = time.strftime("%Y")   # 2014, etc.
-        currentmonth = time.strftime("%m")  # 01 = jan, ..., 12 = dec
-        if os.path.exists( os.path.join( currentyear, currentmonth ) ):
-            month = Month( ".", currentyear, currentmonth )
-        else:
-            sys.exit(" Current month is unavailable in pynances.  Try YYYY"+os.sep+"mm" )
+    root, YYYY, mm = getrootYYYYmm(sys.argv)
+    if root:
+        month = Month( root, YYYY, mm )
     else:
-        if os.path.exists( sys.argv[1] ):
-            args = sys.argv[1].split( os.sep )
-            YYYY, mm = args[0], args[1]
-            month = Month( ".", YYYY, mm )
-        else:
-            sys.exit(" Month "+sys.argv[1]+" is unavailable in pynances.  Try YYYY"+os.sep+"mm" )
+        sys.exit(" Month is unavailable in pynances.  Try YYYY"+os.sep+"mm" )
 
     month.grandtotal()
 
     # call the main function, but wrap it so that the terminal will be ok
     # if the program screws up.
     try: 
-        curses.wrapper( main, month ) 
+        curses.wrapper( main, month, root ) 
     except KeyboardInterrupt: 
         print "Got KeyboardInterrupt exception. Exiting..." 
         exit() 
