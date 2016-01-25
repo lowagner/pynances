@@ -16,8 +16,6 @@ class MainWindow(QMainWindow):
     def __init__(self, args, parent=None):
         super(MainWindow, self).__init__(parent)
      
-        self.rootdir, self.YYYY, self.mm = getrootYYYYmm(args)
-
         self.openfile = None
         self.filename = "UNKNOWN FILE"
 
@@ -64,11 +62,12 @@ class MainWindow(QMainWindow):
         #self.ui.actionSingleClickToOpen.setChecked(True)
         self.ui.actionSaveFile.triggered.connect(self.saveOpenFile)
 
-
         # read in settings to determine if there's a working directory:
-        # self.rootdir = ...
-       
+        root = "." # use this as a guess for root directory
+        self.rootdir, self.YYYY, self.mm = getrootYYYYmm(args, root)
         self.showAll()
+
+        self.ui.centralWidget.setFocus(QtCore.Qt.OtherFocusReason)
 
     def requestDirectory(self):
         self.rootdir = QFileDialog.getExistingDirectory(self, 
@@ -92,13 +91,13 @@ class MainWindow(QMainWindow):
                 if key == QtCore.Qt.Key_Escape:
                     self.history.clearCommand(self.ui.lineEdit.text())
                     self.ui.lineEdit.setText("")
+                    self.ui.centralWidget.setFocus(QtCore.Qt.OtherFocusReason)
                     return True
                 elif key == QtCore.Qt.Key_Return:
                     thetext = self.ui.lineEdit.text()
                     self.execute(thetext)
                     self.history.appendCommand(thetext)
                     self.ui.lineEdit.setText("")
-                    self.ui.centralWidget.setFocus(QtCore.Qt.OtherFocusReason)
                     return True
                 elif key == QtCore.Qt.Key_Up:
                     self.ui.lineEdit.setText(
@@ -112,9 +111,27 @@ class MainWindow(QMainWindow):
                     return True
             else:
                 if key == QtCore.Qt.Key_Escape:
+                    if widget == self.ui.centralWidget:
+                        self.ui.lineEdit.setFocus(QtCore.Qt.OtherFocusReason)
+                    else:
+                        self.ui.centralWidget.setFocus(QtCore.Qt.OtherFocusReason)
+                    return True
+                elif widget == self.ui.textEdit:
+                    # we're in the textEdit
+                    if self.openfile:
+                        self.alert("Editing %s"%self.filename)
+                    # don't return True, we want the key to go through to the textEdit
+                elif (key == QtCore.Qt.Key_Slash or 
+                    key == QtCore.Qt.Key_Question or 
+                    key == QtCore.Qt.Key_Colon or
+                    key == QtCore.Qt.Key_Semicolon):
                     self.ui.lineEdit.setFocus(QtCore.Qt.OtherFocusReason)
                     return True
-                elif widget != self.ui.textEdit:
+                elif widget == self.ui.centralWidget:
+                    if key == QtCore.Qt.Key_S:
+                        self.saveOpenFile()
+                        return True
+                else:
                     if key == QtCore.Qt.Key_Return:
                         if widget == self.ui.categoriesWidget:
                             selitems = widget.selectedItems()
@@ -125,13 +142,6 @@ class MainWindow(QMainWindow):
                             if selitems:
                                 self.loadAccountItem(selitems[0])
                         return True
-                    elif (key == QtCore.Qt.Key_Slash or 
-                        key == QtCore.Qt.Key_Question or 
-                        key == QtCore.Qt.Key_Colon or
-                        key == QtCore.Qt.Key_Semicolon):
-                        self.ui.lineEdit.setFocus(QtCore.Qt.OtherFocusReason)
-                        return True
-
         return False
 
     def singleClickAccount(self, account):
@@ -163,9 +173,57 @@ class MainWindow(QMainWindow):
             self.ui.accountsWidget.clearSelection()
             self.loadFile(filename)
 
+    def alert(self, text):
+        self.ui.statusBar.showMessage(text)
+
     def execute(self, command):
         self.ui.statusBar.showMessage("executing %s"%command)
-        print "executing", command
+
+        if len(command) > 0:
+            if command == "q" or command == "quit" or command == "exit":
+                self.close()
+            else:
+                split = command.split()
+                if split[0] == "s" or split[0] == "save":
+                    self.saveOpenFile()
+
+                elif split[0] == "e" or split[0] == "edit":
+                    if len(split) == 1:
+                        self.loadFile("scratch")
+                    else: 
+                        self.loadFile(split[1])
+                    return # return to avoid setting focus to the default
+
+                elif split[0] == "load" or split[0] == "open" or split[0] == "o":
+                    if len(split) == 1:
+                        self.alert("use load YYYY/mm, or open mm")
+                    else:
+                        root, YYYY, mm = getrootYYYYmm(split, self.rootdir)
+                        if root:
+                            self.rootdir = root
+                            self.YYYY = YYYY
+                            self.mm = mm
+                            self.showAll()
+                        else:
+                            self.alert("Invalid directory!")
+                
+                elif split[0] == "reload":
+                    self.showAll()
+
+                elif command == "generate":
+                    if self.month.generatenextmonth():
+                        self.alert("next month already exists.  type GENERATE to force.")
+                    else:
+                        self.alert("%s generated!"%self.month.nextyearmonth)
+                
+                elif command == "GENERATE":
+                    self.month.generatenextmonth( True )
+                    self.alert("%s re-generated!"%self.month.nextyearmonth)
+
+                else:
+                    self.alert('unknown command: '+command)
+
+        self.ui.centralWidget.setFocus(QtCore.Qt.OtherFocusReason) # default focus after running a command
 
     def resizeEvent(self, event):
         super(MainWindow, self).resizeEvent(event)
@@ -270,7 +328,7 @@ class MainWindow(QMainWindow):
             starttotaldough += sbalance
 
             ebalance = self.month.categories[account.upper()].metavalues["endingbalance"]
-            itemtext.append("\n  end ")
+            itemtext.append("\n   end ")
             itemtext.append(str(ebalance))
             endtotaldough += ebalance
             
@@ -367,26 +425,28 @@ class MainWindow(QMainWindow):
             self.ui.categoriesWidget.addItem("NO BUSINESS")
 
     def loadFile(self, filename):
-        if " " in filename:
-            lines = unicode("LOAD ERROR")
-        else: 
-            self.openfile = os.path.join(self.rootdir, self.YYYY, self.mm, filename)
-            lines = unicode("LOAD ERROR")
+        lines = unicode("LOAD ERROR")
+        if " " not in filename:
+            if filename == "scratch":
+                self.openfile = os.path.join(self.rootdir, filename)
+            else: 
+                self.openfile = os.path.join(self.rootdir, self.YYYY, self.mm, filename)
             with open(self.openfile, 'r') as f:
                 lines = f.read()
             self.filename = filename
+        self.alert("Editing %s"%filename)
         self.ui.textEdit.setText(lines)
         self.ui.textEdit.setStatusTip("Editing %s"%filename)
-        self.ui.statusBar.showMessage("Editing %s"%filename)
+        self.ui.textEdit.setFocus(QtCore.Qt.OtherFocusReason)
    
     def saveOpenFile(self):
         if self.openfile:
             with open(self.openfile, 'w') as f:
                 f.write(self.ui.textEdit.toPlainText())
             self.showAll()
-            self.ui.statusBar.showMessage("%s saved!"%self.filename)
+            self.alert("%s saved!"%self.filename)
         else:
-            self.ui.statusBar.showMessage("No file opened, cannot save")
+            self.alert("No file opened, cannot save")
         
 
 if __name__ == '__main__':
