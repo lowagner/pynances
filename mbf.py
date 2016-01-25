@@ -1,6 +1,7 @@
 # money money money, Must Be Funny, in a rich man's world....
-import time, os, sys
+import os, sys
 import config
+from history import *
 
 def _get_dollars_pennies(amount, currency):
     try:
@@ -604,22 +605,14 @@ class Month(object):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        # only one argument supplied to sys, i.e. this program
-        currentyear = time.strftime("%Y")   # 2014, etc.
-        currentmonth = time.strftime("%m")  # 01 = jan, ..., 12 = dec
-        if os.path.exists( os.path.join( currentyear, currentmonth ) ):
-            month = Month( ".", currentyear, currentmonth )
-        else:
-            raise Exception(" Current month is unavailable in pynances.  Try YYYY"+os.sep+"mm" )
-    else:
-        if os.path.exists( sys.argv[1] ):
-            args = sys.argv[1].split( os.sep )
-            YYYY, mm = args[0], args[1]
-            month = Month( ".", YYYY, mm )
-        else:
-            sys.exit(" Month "+sys.argv[1]+" is unavailable in pynances.  Try YYYY"+os.sep+"mm" )
+    root, YYYY, mm = getrootYYYYmm(sys.argv)
 
-    month.grandtotal( True )
+    if root:
+        month = Month( root, YYYY, mm )
+        month.grandtotal( True )
+    else:
+        print " YYYY%smm %s%s%s is unavailable in pynances.  Try another?"%(
+            os.sep,YYYY,os.sep,mm )
+
 
 
