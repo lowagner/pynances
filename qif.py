@@ -408,7 +408,7 @@ class MainWindow(QMainWindow):
         delta = (self.month.monthlyexpectedincome-self.month.monthlyexpectedoutpour)
         delta.clean()
         self.ui.totalsCategories.addItem(
-            "Expected income - expected outpour:\n  %s"%delta
+            "Budgeted income - outpour:\n  %s"%delta
         )
         self.ui.totalsCategories.addItem(
             "Accumulated anti-savings:\n  %s"%self.month.accumulatedantisavings
@@ -424,19 +424,28 @@ class MainWindow(QMainWindow):
             self.ui.categoriesWidget.addItem("NO BUSINESS")
 
     def loadFile(self, filename):
-        lines = unicode("LOAD ERROR")
+        self.openfile = None
+        print "Loading file", filename
         if " " not in filename:
             if filename == "scratch":
                 self.openfile = os.path.join(self.rootdir, filename)
             else: 
                 self.openfile = os.path.join(self.rootdir, self.YYYY, self.mm, filename)
+            self.filename = filename
+        else:
+            filename = filename.split(" ")
+            if len(filename) == 2 and filename[0] == "Business":
+                self.filename = filename[1]
+                self.openfile = os.path.join(self.rootdir, self.YYYY, self.mm, self.filename)
+
+        lines = unicode("LOAD ERROR")
+        if self.openfile:
+            self.alert("Editing %s"%self.filename)
+            self.ui.textEdit.setStatusTip("Editing %s"%self.filename)
+            self.ui.textEdit.setFocus(QtCore.Qt.OtherFocusReason)
             with open(self.openfile, 'r') as f:
                 lines = f.read()
-            self.filename = filename
-        self.alert("Editing %s"%filename)
         self.ui.textEdit.setText(lines)
-        self.ui.textEdit.setStatusTip("Editing %s"%filename)
-        self.ui.textEdit.setFocus(QtCore.Qt.OtherFocusReason)
    
     def saveOpenFile(self):
         if self.openfile:
