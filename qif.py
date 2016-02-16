@@ -401,8 +401,7 @@ class MainWindow(QMainWindow):
             # don't print accounts here, or business categories (yet)
             if not cat.metaflags["account"]: 
                 if cat.metaflags["business"]:
-                    if (cat.metavalues["startingbalance"] != 0 or cat.metavalues["endingbalance"] != 0):
-                        businesscats.append(cat)
+                    businesscats.append(cat)
                 else:
                     self.showCategory(cat)
         
