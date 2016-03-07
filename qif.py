@@ -48,6 +48,7 @@ class MainWindow(QMainWindow):
         self.ui.textEdit.setStatusTip("File Editor")
         self.ui.textEdit.setFrameShape(PySide.QtGui.QFrame.Box)
         self.ui.textEdit.installEventFilter(self)
+        self.ui.textEdit.setAcceptRichText(False)
         
         wincol = self.palette().color(QPalette.Window); 
         self.ui.lineEdit.setStyleSheet("background-color: %s;"%wincol.name())
