@@ -2,6 +2,7 @@ import os, time
 
 def getrootYYYYmm(args, mayberoot="."):
     # get the year and month from args, if possible.
+    rootdir = None
     YYYY = None
     mm = None
     if len(args) == 1:
