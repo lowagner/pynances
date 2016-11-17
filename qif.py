@@ -164,7 +164,7 @@ class MainWindow(QMainWindow):
     def loadAccountItem(self, account):
         filename = account.text().split("\n")[0]
         # find first parentheses group:
-        filename = filename[filename.find("(")+1:filename.find(")")]
+        filename = filename[0:filename.find(" ")]
         self.ui.categoriesWidget.clearSelection()
         self.loadFile(filename)
 
@@ -268,15 +268,15 @@ class MainWindow(QMainWindow):
                 # not very wide.
                 self.ui.accountsWidget.resize(w/2-4, h/2-46)
                 self.ui.accountsWidget.move(2,0)
-                self.ui.totalsAccounts.resize(w/2-4,90)
+                self.ui.totalsAccounts.resize(w/2-4,120)
                 self.ui.totalsAccounts.move(2,h/2-42)
                 self.ui.categoriesWidget.resize(w/2-4, h/2-46)
                 self.ui.categoriesWidget.move(w/2+2, 0)
-                self.ui.totalsCategories.resize(w/2-4,90)
+                self.ui.totalsCategories.resize(w/2-4,120)
                 self.ui.totalsCategories.move(w/2+2,h/2-42)
 
-                self.ui.textEdit.resize(w-4, h/2-139)
-                self.ui.textEdit.move(2, h/2+52)
+                self.ui.textEdit.resize(w-4, h/2-169)
+                self.ui.textEdit.move(2, h/2+82)
                 
                 self.ui.lineEdit.resize(w-4, 32)
                 self.ui.lineEdit.move(2, h-86)
@@ -319,7 +319,7 @@ class MainWindow(QMainWindow):
         accounts.sort()
         for account in accounts:
             accountname = self.month.accountlist[account]
-            itemtext = [ accountname, " (%s):"%account ]
+            itemtext = [ account, " (%s):"%accountname ]
             try:
                 sbalance = self.month.categories[account.upper()].metavalues["startingbalance"]
             except KeyError:
@@ -335,12 +335,10 @@ class MainWindow(QMainWindow):
             
             self.ui.accountsWidget.addItem("".join(itemtext))
 
-        self.ui.totalsAccounts.addItem("".join(
-            ["Totals:",
-             "\n start ", str(starttotaldough.clean()), 
-             "\n delta ", str(endtotaldough-starttotaldough), 
-             "\n   end ", str(endtotaldough.clean())]
-        ))
+        self.ui.totalsAccounts.addItem("Totals:")
+        self.ui.totalsAccounts.addItem(" start "+ str(starttotaldough.clean()))
+        self.ui.totalsAccounts.addItem(" delta "+ str(endtotaldough-starttotaldough))
+        self.ui.totalsAccounts.addItem("   end "+ str(endtotaldough.clean()))
 
     def showCategory(self, cat):
         # if not an account, it's a category we can analyze more

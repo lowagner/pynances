@@ -9,11 +9,12 @@ recurring Cell Phone PAID EX 0.00
 recurring Bank Fee PAID ED 3.80
 
 # health insurance averages to 179.53 euros a month
-# but it gets paid every january in one big lump sum.
+# but it gets paid every january in one big lump sum of 2154.36 euro.
 
-recurring Health Insurance AVERAGE 1 ED 179.53
+recurring Health Insurance PAIDONLY 1 ED 2154.36
 
 # water averages to 13.54 euros a month, but
-# it gets paid every other month -- February, April, etc.
+# it gets paid every other month -- February, April, etc.,
+# so 27.08 euro gets taken out when the payment is due.
 
-recurring Water AVERAGE 2468OD ED 13.54
+recurring Water PAIDONLY 2468OD ED 27.08

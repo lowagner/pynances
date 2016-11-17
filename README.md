@@ -235,7 +235,7 @@ program, and should be used with care inside of the YYYY/mm directory files.
 
 + `paid/PAID` - case insensitive.  Immediately following a PAID you should include the account from which you are paying money.
 
-+ `average/AVERAGE` - case insensitive.  Immediately following an AVERAGE come two things:  first, a concatenation of all months that the bill actually gets paid, e.g. 369D for March, June, September, and December, then the account from which it gets paid.  At the end of the line comes the monthly average drain on your account.
++ `paidonly/PAIDONLY` - case insensitive.  Immediately following a PAIDONLY come two things:  first, a concatenation of all months that the bill actually gets paid, e.g. 369D for March, June, September, and December, then the account from which it gets paid.  At the end of the line comes the actual drain on the account each month it gets taken out.  See below for an example.
 
 
 ### Examples
@@ -257,10 +257,11 @@ In the cash account file, you might have something like this:
 In the car insurance, you might pay it twice a year at $420 a pop; 
 the average monthly cost is $70:
 
-    Gecko Insurance AVERAGE 4O D 70 USD
+    Gecko Insurance PAIDONLY 4O D 420 USD
 
 where `4O` implies that 4 = April, O = October (not a zero) is when the
-insurance company takes out the money from your debit account.
+insurance company takes out the money from your debit account, and the payments
+are 420 USD each (averaging out to $70 a month).
 
 
 Closing remarks

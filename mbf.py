@@ -200,6 +200,7 @@ class DoughFromSplit( Dough ):
                 config.DEFAULTcurrency)
         else:
             i = 0
+            nextMinus = 1
             while i < len(doughsplit):
                 try:
                     checkunits = doughsplit[i+1].upper()
@@ -207,8 +208,13 @@ class DoughFromSplit( Dough ):
                         checkunits = "EURO"
                 except IndexError:
                     checkunits = config.DEFAULTcurrency
-                self.dough[checkunits] = _get_dough( doughsplit[i], checkunits )
-                i += 3 # skip the + sign
+                self.dough[checkunits] = _get_dough( doughsplit[i], checkunits ) * nextMinus
+                # check for a minus sign for the next value
+                if i + 2 < len(doughsplit) and doughsplit[i+2] == "-":
+                    nextMinus = -1
+                else:
+                    nextMinus = 1
+                i += 3
 
 class Entry(object):
     def __init__( self, info ):
@@ -226,7 +232,7 @@ class Entry(object):
                     self.account = info[i+1].upper() # capitalize the account
                     i += 2
                     break
-                elif infoupper == "AVERAGE":
+                elif infoupper == "PAIDONLY":
                     self.averaged = True
                     self.name = info[:i]
                     self.paidlanguage = info[i] + " " + info[i+1]
@@ -236,13 +242,13 @@ class Entry(object):
                     break
                 i -= 1
             if i < 0:
-                raise Exception("While parsing %s, Entry expected a PAID/FROM/AVERAGE" % " ".join(info))
+                raise Exception("While parsing %s, Entry expected a PAID/FROM/PAIDONLY" % " ".join(info))
             
             # use index i to get the dough (probably the last few numbers and currencies):
             self.dough = DoughFromSplit( info[i:] )
             self.dough.clean()
         except IndexError:
-            raise Exception("While parsing %s, Entry expected Dough after PAID/FROM/AVERAGE"% " ".join(info))
+            raise Exception("While parsing %s, Entry expected Dough after PAID/FROM/PAIDONLY"% " ".join(info))
 
         # construct name from the list self.name
         if len(self.name) < 1: 
@@ -254,12 +260,15 @@ class Entry(object):
             self.name = " ".join(self.name)
 
     def budget( self ):
-        return self.dough.copy()
+        if self.averaged:
+            return self.dough.copy() * (len(self.outmonths)/ 12.0)
+        else:
+            return self.dough.copy()
         
     def actual( self, month ):
         if self.averaged:
             if config.MONTHS[int(month)-1] in self.outmonths:
-                return (self.dough.copy() * (12.0 / len(self.outmonths)))
+                return self.dough.copy()
             else:
                 return Dough(0) 
         else:
