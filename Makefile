@@ -3,7 +3,7 @@
 all:  mainwindow.py run
 
 run:  
-	python qif.py
+	./qtpynances.py
 
 mainwindow.py:  mainwindow.ui
 	pyside-uic mainwindow.ui > mainwindow.py

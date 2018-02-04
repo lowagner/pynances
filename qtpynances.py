@@ -1,4 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
+from __future__ import print_function
+from threading import Timer
 __version__ = "0.1a"
 
 from mbf import *
@@ -12,9 +14,31 @@ from PySide import QtCore
 
 from mainwindow import Ui_MainWindow as Ui
 
+# supported operators
+import ast
+import operator as op
+operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
+             ast.Div: op.truediv, ast.Pow: op.pow, ast.USub: op.neg}
+
+def eval_math(text):
+    return eval_(ast.parse(text, mode='eval').body)
+
+def eval_(node):
+    if isinstance(node, ast.Num): # <number>
+        return node.n
+    elif isinstance(node, ast.BinOp): # <left> <operator> <right>
+        return operators[type(node.op)](eval_(node.left), eval_(node.right))
+    elif isinstance(node, ast.UnaryOp): # <operator> <operand> e.g., -1
+        return operators[type(node.op)](eval_(node.operand))
+    else:
+        raise TypeError(node)
+
 class MainWindow(QMainWindow):
     def __init__(self, args, parent=None):
         super(MainWindow, self).__init__(parent)
+        self.timeoutFunction = None
+        self.staticAlertMessage = ""
+        self.timeoutLength = 15
      
         self.openfile = None
         self.filename = "UNKNOWN FILE"
@@ -119,8 +143,9 @@ class MainWindow(QMainWindow):
                     return True
                 elif widget == self.ui.textEdit:
                     # we're in the textEdit
-                    if self.openfile:
-                        self.alert("Editing %s"%self.filename)
+                    #if self.openfile:
+                    #    self.alert("Editing %s"%self.filename)
+                    return False
                     # don't return True, we want the key to go through to the textEdit
                 elif (key == QtCore.Qt.Key_Slash or 
                     key == QtCore.Qt.Key_Question or 
@@ -173,16 +198,30 @@ class MainWindow(QMainWindow):
         if "BUSINESS" not in filename:
             self.ui.accountsWidget.clearSelection()
             self.loadFile(filename)
-
-    def alert(self, text):
+    
+    def clearAlert(self):
+        self.ui.statusBar.showMessage(self.staticAlertMessage)
+        
+    def alert(self, text, timeout=0):
+        if self.timeoutFunction is not None:
+            self.timeoutFunction.cancel()
         self.ui.statusBar.showMessage(text)
+        if timeout <= 0:
+            self.staticAlertMessage = text
+            return
+        self.timeoutFunction = Timer(timeout, self.clearAlert)
+        self.timeoutFunction.start()
 
     def execute(self, command):
-        self.ui.statusBar.showMessage("executing %s"%command)
-
         if len(command) > 0:
             if command == "q" or command == "quit" or command == "exit":
                 self.close()
+            elif command[0].isnumeric():
+                try:
+                    result = eval_math(command)
+                    self.ui.statusBar.showMessage(str(result)+"     = "+command)
+                except:
+                    self.ui.statusBar.showMessage("invalid math")
             else:
                 split = command.split()
                 if split[0] == "s" or split[0] == "save":
@@ -197,7 +236,7 @@ class MainWindow(QMainWindow):
 
                 elif split[0] == "load" or split[0] == "open" or split[0] == "o":
                     if len(split) == 1:
-                        self.alert("use load YYYY/mm, or open mm")
+                        self.alert("use load YYYY/mm, or open mm", self.timeoutLength)
                     else:
                         root, YYYY, mm = getrootYYYYmm(split, self.rootdir)
                         if root:
@@ -206,23 +245,23 @@ class MainWindow(QMainWindow):
                             self.mm = mm
                             self.showAll()
                         else:
-                            self.alert("Invalid directory!")
+                            self.alert("Invalid directory!", self.timeoutLength)
                 
                 elif split[0] == "reload":
                     self.showAll()
 
                 elif command == "generate":
                     if self.month.generatenextmonth():
-                        self.alert("next month already exists.  type GENERATE to force.")
+                        self.alert("next month already exists.  type GENERATE to force.", self.timeoutLength)
                     else:
-                        self.alert("%s generated!"%self.month.nextyearmonth)
+                        self.alert("%s generated!"%self.month.nextyearmonth, self.timeoutLength)
                 
                 elif command == "GENERATE":
                     self.month.generatenextmonth( True )
-                    self.alert("%s re-generated!"%self.month.nextyearmonth)
+                    self.alert("%s re-generated!"%self.month.nextyearmonth, self.timeoutLength)
 
                 else:
-                    self.alert('unknown command: '+command)
+                    self.alert('unknown command: '+command, self.timeoutLength)
 
         self.ui.centralWidget.setFocus(QtCore.Qt.OtherFocusReason) # default focus after running a command
 
@@ -424,7 +463,7 @@ class MainWindow(QMainWindow):
 
     def loadFile(self, filename):
         self.openfile = None
-        print "Loading file", filename
+        print("Loading file", filename)
         if " " not in filename:
             if filename == "scratch":
                 self.openfile = os.path.join(self.rootdir, filename)
@@ -451,9 +490,9 @@ class MainWindow(QMainWindow):
             with open(self.openfile, 'w') as f:
                 f.write(self.ui.textEdit.toPlainText())
             self.showAll()
-            self.alert("%s saved!"%self.filename)
+            self.alert("%s saved!"%self.filename, self.timeoutLength)
         else:
-            self.alert("No file opened, cannot save")
+            self.alert("No file opened, cannot save", self.timeoutLength)
         
 
 if __name__ == '__main__':
