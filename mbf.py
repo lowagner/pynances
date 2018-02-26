@@ -1,4 +1,5 @@
 # money money money, Must Be Funny, in a rich man's world....
+from __future__ import print_function
 import os, sys
 import config
 from history import *
@@ -39,7 +40,10 @@ class Dough(object):
         checkunits = units.upper()
         if checkunits == "EUROS":
             checkunits = "EURO"
-        self.dough[checkunits] = amount
+        if checkunits in self.dough:
+            self.dough[checkunits] += amount
+        else:
+            self.dough[checkunits] = amount
 
     def copy( self ): 
         ''' make a deep copy of oneself '''
@@ -208,7 +212,11 @@ class DoughFromSplit( Dough ):
                         checkunits = "EURO"
                 except IndexError:
                     checkunits = config.DEFAULTcurrency
-                self.dough[checkunits] = _get_dough( doughsplit[i], checkunits ) * nextMinus
+                nextAmount = _get_dough( doughsplit[i], checkunits ) * nextMinus
+                if checkunits in self.dough:
+                    self.dough[checkunits] += nextAmount
+                else:
+                    self.dough[checkunits] = nextAmount
                 # check for a minus sign for the next value
                 if i + 2 < len(doughsplit) and doughsplit[i+2] == "-":
                     nextMinus = -1
@@ -294,7 +302,7 @@ class Category(object):
 
 #### CATEGORY CLASS
     def parse( self, accountlist ):
-        print " Parsing ", self.filename
+        print (" Parsing ", self.filename)
         
         self.entries = []
         self.nextmonthentries = []
@@ -326,12 +334,12 @@ class Category(object):
         if self.metaflags["account"] and self.metaflags["income"]:
             raise Exception("do not put account and income in the same file.")
         if self.metaflags["income"] and self.metaflags["budgetenough"]:
-            print "weird:  should not include \"income\" and \"budgetenough\" in file " +self.filename
+            print( "weird:  should not include \"income\" and \"budgetenough\" in file " +self.filename)
 
         # require "ending balance" to get put in:
         if "startingbalance" not in self.metavalues:
             if self.metaflags["account"]:
-                print "Warning, expected to see a startingbalance in account", self.name
+                print( "Warning, expected to see a startingbalance in account", self.name)
             self.metavalues["startingbalance"] = Dough(0)
         self.metavalues["endingbalance"] = self.metavalues["startingbalance"].copy()
         
@@ -552,19 +560,19 @@ class Month(object):
 
 
         if printme:
-            print "TOTALS"
-            print "grand total actual change = ", self.totaldeltaactual
-            print "grand total averaged/budgeted change = ", self.totaldeltabudget 
-            print
-            print " monthly expected income = ", self.monthlyexpectedincome
-            print " monthly expected outpour = ", self.monthlyexpectedoutpour
-            print " accumulated anti savings = ", self.accumulatedantisavings
-            print 
-            print " total actual income = ", self.totalactualincome 
-            print " total actual spending = ", self.totalactualspendings
-            print " Delta = ", (self.totalactualincome - self.totalactualspendings)
-            print 
-            print "ACCOUNTS"
+            print( "TOTALS")
+            print( "grand total actual change = ", self.totaldeltaactual)
+            print( "grand total averaged/budgeted change = ", self.totaldeltabudget )
+            print()
+            print( " monthly expected income = ", self.monthlyexpectedincome)
+            print( " monthly expected outpour = ", self.monthlyexpectedoutpour)
+            print( " accumulated anti savings = ", self.accumulatedantisavings)
+            print( )
+            print( " total actual income = ", self.totalactualincome )
+            print( " total actual spending = ", self.totalactualspendings)
+            print( " Delta = ", (self.totalactualincome - self.totalactualspendings))
+            print( )
+            print( "ACCOUNTS")
 
 
         for account in self.accountlist:
@@ -573,8 +581,8 @@ class Month(object):
             deltamonth.clean()
 
             if printme:
-                print "delta money in ", account, ": ", deltamonth
-                print "   end of month account balance: ", endmonth
+                print ("delta money in ", account, ": ", deltamonth)
+                print ("   end of month account balance: ", endmonth)
 
 
     def generatenextmonth( self, deletedir=False ):
@@ -596,8 +604,8 @@ class Month(object):
                     try:
                         if os.path.isfile( path ):
                             os.unlink( path )
-                    except Exception, e:
-                        print e
+                    except( Exception, e):
+                        print( e)
                         raise Exception("cannot proceed for some reason")
             else:
                 return 1
@@ -620,8 +628,8 @@ if __name__ == "__main__":
         month = Month( root, YYYY, mm )
         month.grandtotal( True )
     else:
-        print " YYYY%smm %s%s%s is unavailable in pynances.  Try another?"%(
-            os.sep,YYYY,os.sep,mm )
+        print (" YYYY%smm %s%s%s is unavailable in pynances.  Try another?"%(
+            os.sep,YYYY,os.sep,mm ))
 
 
 
